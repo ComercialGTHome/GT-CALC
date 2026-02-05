@@ -1,0 +1,3799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="GT Home">
+    <title>GT Home - Sistema de Correção e Negociação</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23000' width='100' height='100'/><text y='70' font-size='70' fill='%23FF6B00'>GT</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --gt-black: #0a0a0a;
+            --gt-black-card: #121212;
+            --gt-black-hover: #1a1a1a;
+            --gt-orange: #FF6B00;
+            --gt-orange-dim: rgba(255, 107, 0, 0.7);
+            --gt-orange-border: rgba(255, 107, 0, 0.2);
+            --gt-orange-glow: rgba(255, 107, 0, 0.1);
+            --gt-gray: #1a1a1a;
+            --gt-gray-text: #808080;
+            --gt-white: #ffffff;
+            --gt-border: rgba(255, 255, 255, 0.1);
+            --success: #00C853;
+            --error: #FF3D00;
+            --shadow-sm: 0 2px 15px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 30px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 40px rgba(255, 107, 0, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--gt-black);
+            color: var(--gt-white);
+            min-height: 100vh;
+            padding: 0;
+            overflow-x: hidden;
+            letter-spacing: 0.3px;
+            font-weight: 400;
+        }
+
+        h2, h3 {
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .header {
+            background: var(--gt-black-card);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            border-bottom: 1px solid var(--gt-orange-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .header.compact {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .header.compact .logo {
+            min-height: 40px;
+            margin-bottom: 0;
+            justify-content: flex-start;
+        }
+
+        .logo img {
+            transition: all 0.3s ease;
+        }
+
+        .header.compact .logo img {
+            height: 40px !important;
+        }
+
+        .logo img:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2) drop-shadow(2px 2px 8px rgba(255, 107, 0, 0.5)) !important;
+        }
+
+        .logo span {
+            color: var(--gt-orange);
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            opacity: 0.85;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .header.compact .subtitle {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 1rem;
+            max-width: 1400px;
+            margin: 1.5rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: var(--gt-black-card);
+            border: 1px solid var(--gt-border);
+            border-left: 3px solid transparent;
+            border-radius: 8px;
+            color: var(--gt-white);
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .mode-btn:hover {
+            border-left-color: var(--gt-orange-dim);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+            background: var(--gt-black-hover);
+        }
+
+        .mode-btn.active {
+            background: var(--gt-black-hover);
+            border-left-color: var(--gt-orange);
+            border-color: var(--gt-orange-border);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .mode-icon {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            opacity: 0.7;
+            flex-shrink: 0;
+        }
+
+        .mode-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--gt-orange);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        .mode-btn.active .mode-icon {
+            opacity: 1;
+        }
+
+        .mode-btn > div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+
+        .mode-btn > div > span:first-child {
+            font-weight: 600;
+        }
+
+        .mode-description {
+            font-size: 0.7rem;
+            font-weight: 400;
+            opacity: 0.6;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--gt-gray-text);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .content-area {
+            display: none;
+        }
+
+        .content-area.active {
+            display: block;
+        }
+
+        /* Grid Layout para Modo Projeção */
+        .projection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .projection-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section {
+            background: var(--gt-black-card);
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--gt-border);
+            border-left: 3px solid var(--gt-orange-border);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-left-color: var(--gt-orange-dim);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gt-border);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            letter-spacing: 0.5px;
+            color: var(--gt-white);
+        }
+
+        .section-title::before {
+            display: none;
+        }
+
+        /* Toggle Switch R$ / % */
+        .input-mode-toggle {
+            display: flex;
+            background: var(--gt-black-hover);
+            border-radius: 8px;
+            padding: 0.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--gt-border);
+        }
+
+        .toggle-option {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            color: var(--gt-white);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            opacity: 0.6;
+            letter-spacing: 0.5px;
+        }
+
+        .toggle-option.active {
+            background: var(--gt-orange);
+            opacity: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.3px;
+        }
+
+        label .required {
+            color: var(--gt-orange);
+            margin-left: 0.25rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--gt-border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: var(--gt-black-hover);
+            color: var(--gt-white);
+            transition: all 0.25s ease;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gt-orange-dim);
+            background: var(--gt-black-card);
+            box-shadow: 0 0 0 3px var(--gt-orange-glow);
+        }
+
+        input.valid {
+            border-color: var(--success);
+        }
+
+        input.invalid {
+            border-color: var(--error);
+        }
+
+        input:disabled, input:read-only {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .split-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .reforco-item {
+            background: var(--gt-black-hover);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--gt-orange-dim);
+            margin-bottom: 1rem;
+        }
+
+        .reforco-item-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--gt-orange);
+            margin-bottom: 0.75rem;
+            text-transform: none;
+            letter-spacing: 0.5px;
+        }
+
+        .reforco-fields {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .validation-msg {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.875rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .validation-msg.success {
+            color: var(--success);
+            background: rgba(0, 200, 83, 0.08);
+            border: 1px solid var(--success);
+        }
+
+        .validation-msg.error {
+            color: var(--error);
+            background: rgba(255, 61, 0, 0.08);
+            border: 1px solid var(--error);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--gt-orange);
+            color: var(--gt-white);
+            border: none;
+            padding: 0.9rem 1.5rem;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            background: var(--gt-orange-dim);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn:active {
+            transform: scale(0.99);
+        }
+
+        .btn-secondary {
+            background: var(--gt-black-card);
+            border: 1px solid var(--gt-orange-border);
+            color: var(--gt-orange);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gt-black-hover);
+            border-color: var(--gt-orange-dim);
+        }
+
+        /* Results Section */
+        .results-section {
+            display: none;
+            grid-column: 1 / -1;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, var(--gt-gray-light) 0%, var(--gt-gray) 100%);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--gt-orange);
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--gt-orange);
+        }
+
+        .result-card.highlight {
+            background: linear-gradient(135deg, var(--gt-orange) 0%, var(--gt-orange-dark) 100%);
+            border: none;
+        }
+
+        .result-card.highlight .result-label,
+        .result-card.highlight .result-value {
+            color: var(--gt-white);
+        }
+
+        /* Negotiation Table */
+        .negotiation-table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .negotiation-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--gt-gray-light);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .negotiation-table thead {
+            background: linear-gradient(135deg, var(--gt-orange) 0%, var(--gt-orange-dark) 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .negotiation-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            color: var(--gt-white);
+        }
+
+        .negotiation-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--gt-border);
+            font-size: 0.9rem;
+        }
+
+        .negotiation-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .negotiation-table tbody tr:hover {
+            background: rgba(255, 107, 0, 0.08);
+            transform: scale(1.01);
+        }
+
+        .negotiation-table tr.selected {
+            background: rgba(255, 107, 0, 0.2);
+            border-left: 4px solid var(--gt-orange);
+        }
+
+        .negotiation-table tr.selected td {
+            font-weight: 600;
+        }
+
+        .negotiation-table .checkbox-cell {
+            width: 50px;
+            text-align: center;
+        }
+
+        .negotiation-table input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--gt-orange);
+        }
+
+        .negotiation-table .type-badge {
+            display: inline-block;
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-badge.parcela {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.2) 0%, rgba(0, 200, 83, 0.3) 100%);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .type-badge.reforco {
+            background: linear-gradient(135deg, rgba(255, 107, 0, 0.2) 0%, rgba(255, 107, 0, 0.3) 100%);
+            color: var(--gt-orange);
+            border: 1px solid var(--gt-orange);
+        }
+
+        .type-badge.chaves {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.3) 100%);
+            color: #F57C00;
+            border: 1px solid #F57C00;
+        }
+
+        /* Animations and Visual Enhancements */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .result-card {
+            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 0, 0.2);
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 0.25rem;
+            color: var(--gt-orange);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gt-black);
+            color: var(--gt-white);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            animation: fadeIn 0.2s ease-out;
+            border: 1px solid var(--gt-orange);
+        }
+
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 115%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--gt-black);
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        /* Button Loading State */
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn-text {
+            display: inline-block;
+        }
+
+        .btn.loading .btn-text {
+            opacity: 0;
+        }
+
+        .btn-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn.loading .btn-loading {
+            display: flex;
+        }
+
+        .btn-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Success/Error Input States */
+        .input-success {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.05);
+        }
+
+        .input-error {
+            border-color: var(--error) !important;
+            background: rgba(255, 61, 0, 0.05);
+        }
+
+        /* New item highlight */
+        .new-item {
+            animation: pulse 0.5s ease-out;
+        }
+
+        /* Comparador de Cenários */
+        .comparator-section {
+            background: var(--gt-gray);
+            border: 2px solid var(--gt-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .comparator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .scenario-card {
+            background: var(--gt-gray-light);
+            border: 2px solid var(--gt-border);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .scenario-card.selected {
+            border-color: var(--gt-orange);
+            box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--gt-border);
+        }
+
+        .scenario-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--gt-white);
+        }
+
+        .scenario-badge {
+            background: var(--gt-orange);
+            color: var(--gt-white);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .scenario-badge.best {
+            background: var(--success);
+        }
+
+        .scenario-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .scenario-stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .scenario-stat-label {
+            opacity: 0.7;
+        }
+
+        .scenario-stat-value {
+            font-weight: 700;
+            color: var(--gt-orange);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            background: var(--gt-gray-light);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gt-border);
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, var(--gt-orange) 0%, var(--gt-orange-dark) 100%);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            color: var(--gt-white);
+        }
+
+        .comparison-table .best-value {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .comparison-table .worst-value {
+            color: var(--error);
+            opacity: 0.7;
+        }
+
+        /* Quick Proposal Scenario Cards */
+        .quick-scenario-card {
+            background: var(--gt-gray);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 2px solid rgba(255, 107, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .quick-scenario-card.editing {
+            border-color: var(--gt-orange);
+            box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+        }
+
+        .quick-scenario-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255, 107, 0, 0.2);
+        }
+
+        .quick-scenario-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gt-orange);
+        }
+
+        .quick-scenario-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .quick-scenario-btn {
+            background: transparent;
+            border: none;
+            color: var(--gt-white);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .quick-scenario-btn:hover {
+            background: rgba(255, 107, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .quick-scenario-field {
+            margin-bottom: 1rem;
+        }
+
+        .quick-scenario-field label {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            margin-bottom: 0.3rem;
+        }
+
+        .quick-scenario-field input,
+        .quick-scenario-field select {
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--gt-black);
+            border: 1px solid rgba(255, 107, 0, 0.3);
+            border-radius: 6px;
+            color: var(--gt-white);
+            font-size: 0.95rem;
+        }
+
+        .quick-scenario-field input:focus,
+        .quick-scenario-field select:focus {
+            outline: none;
+            border-color: var(--gt-orange);
+            box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
+        }
+
+        .quick-scenario-summary {
+            background: rgba(255, 107, 0, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .quick-scenario-summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            font-size: 0.9rem;
+        }
+
+        .quick-scenario-summary-item.total {
+            border-top: 2px solid var(--gt-orange);
+            margin-top: 0.5rem;
+            padding-top: 0.75rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--gt-orange);
+        }
+
+        /* Discount Summary */
+        .discount-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--gt-gray);
+            border-radius: 12px;
+            border: 2px solid var(--gt-orange);
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gt-white);
+        }
+
+        .summary-value.discount {
+            color: var(--discount);
+        }
+
+        .summary-value.current {
+            color: var(--success);
+        }
+
+        .summary-value.projected {
+            color: var(--gt-orange);
+        }
+
+        /* Indices Collapsible */
+        .indices-collapsible {
+            background: var(--gt-gray-light);
+            border: 2px solid var(--gt-orange);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .indices-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 600;
+            user-select: none;
+        }
+
+        .indices-header::after {
+            content: '▼';
+            transition: transform 0.3s ease;
+        }
+
+        .indices-header.active::after {
+            transform: rotate(180deg);
+        }
+
+        .indices-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .indices-content.active {
+            max-height: 500px;
+            padding: 1rem;
+            border-top: 1px solid var(--gt-border);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            border-top: 1px solid var(--gt-border);
+            margin-top: 3rem;
+        }
+
+        /* Print Styles */
+        @media print {
+            @page {
+                margin: 1.5cm;
+                size: A4;
+            }
+
+            body {
+                background: white;
+                color: black;
+            }
+
+            .header {
+                background: #000000 !important;
+                color: white !important;
+                border-bottom: 5px solid #FF6B00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-after: avoid;
+                padding: 1.5rem !important;
+            }
+
+            .logo {
+                font-size: 2.5rem !important;
+                font-weight: 900 !important;
+            }
+
+            .logo span {
+                color: #FF6B00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .subtitle {
+                font-size: 0.9rem !important;
+                margin-top: 0.5rem;
+            }
+
+            /* Add date and time to print */
+            .header::after {
+                content: "Gerado em: " attr(data-print-date);
+                display: block;
+                font-size: 0.75rem;
+                margin-top: 0.5rem;
+                opacity: 0.8;
+            }
+
+            .mode-selector,
+            .btn,
+            .footer,
+            .indices-collapsible,
+            #projectionMode .section:not(#resultsProjection):not(#detailedReportProjection),
+            #negotiationMode .section:not(#negotiationTableSection),
+            .form-group,
+            .input-mode-toggle,
+            .spinner,
+            #unidadeSelect {
+                display: none !important;
+            }
+
+            .section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                border: 2px solid #333 !important;
+                margin-bottom: 1rem;
+                box-shadow: none !important;
+            }
+
+            .section-title {
+                background: linear-gradient(135deg, #FF6B00 0%, #E55F00 100%) !important;
+                color: white !important;
+                padding: 0.75rem 1rem !important;
+                margin: -1.5rem -1.5rem 1rem -1.5rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                border-bottom: 2px solid #000 !important;
+                font-size: 1.1rem !important;
+            }
+
+            .section-title::before {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .results-grid {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+            }
+
+            .result-card {
+                border: 2px solid #333 !important;
+                background: #f9f9f9 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+                padding: 0.75rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .result-card.highlight {
+                background: #FF6B00 !important;
+                border-color: #FF6B00 !important;
+                grid-column: 1 / -1 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .result-card.highlight .result-label,
+            .result-card.highlight .result-value {
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .result-label {
+                color: #666 !important;
+                font-size: 0.7rem !important;
+            }
+
+            .result-value {
+                color: #FF6B00 !important;
+                font-size: 1.3rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .result-card.highlight .result-value {
+                font-size: 1.8rem !important;
+            }
+
+            .negotiation-table-container {
+                page-break-inside: avoid;
+            }
+
+            .negotiation-table {
+                border: 2px solid #000 !important;
+                font-size: 0.7rem !important;
+                width: 100% !important;
+            }
+
+            .negotiation-table thead {
+                background: linear-gradient(135deg, #FF6B00 0%, #E55F00 100%) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .negotiation-table th {
+                color: white !important;
+                border: 1px solid #000 !important;
+                padding: 0.5rem !important;
+                font-size: 0.7rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .negotiation-table td {
+                border: 1px solid #ddd !important;
+                padding: 0.4rem !important;
+                font-size: 0.65rem !important;
+            }
+
+            .negotiation-table tr.highlight {
+                background: #fff3e0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .negotiation-table tr.selected {
+                background: #ffe0b2 !important;
+                font-weight: 700 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .type-badge {
+                padding: 0.15rem 0.4rem !important;
+                font-size: 0.6rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .type-badge.parcela {
+                background: rgba(0, 200, 83, 0.2) !important;
+                color: #00C853 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .type-badge.reforco {
+                background: rgba(255, 107, 0, 0.2) !important;
+                color: #FF6B00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .type-badge.chaves {
+                background: rgba(255, 215, 0, 0.3) !important;
+                color: #F57C00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .discount-summary {
+                border: 3px solid #FF6B00 !important;
+                background: #fff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-inside: avoid;
+                margin-bottom: 1.5rem !important;
+            }
+
+            .summary-item {
+                border: 1px solid #eee !important;
+                padding: 0.75rem !important;
+            }
+
+            .summary-label {
+                font-size: 0.75rem !important;
+            }
+
+            .summary-value {
+                font-size: 1.5rem !important;
+            }
+
+            .summary-value.discount {
+                color: #FF1744 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .summary-value.current {
+                color: #00C853 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .summary-value.projected {
+                color: #FF6B00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .checkbox-cell {
+                display: none !important;
+            }
+
+            .negotiation-table th:first-child,
+            .negotiation-table td:first-child {
+                display: none !important;
+            }
+
+            /* Print Summary Box */
+            .print-summary {
+                display: block !important;
+                background: #f5f5f5 !important;
+                border: 3px solid #333 !important;
+                border-left: 8px solid #FF6B00 !important;
+                padding: 1.25rem !important;
+                margin-bottom: 1.5rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                page-break-inside: avoid;
+            }
+
+            .print-summary h3 {
+                color: #FF6B00 !important;
+                margin-bottom: 1rem !important;
+                font-size: 1.3rem !important;
+                border-bottom: 2px solid #FF6B00 !important;
+                padding-bottom: 0.5rem !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-summary-grid {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.5rem !important;
+            }
+
+            .print-summary-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 0.4rem 0;
+                border-bottom: 1px solid #ddd;
+                font-size: 0.85rem;
+            }
+
+            .print-summary-label {
+                font-weight: 600;
+                color: #333;
+            }
+
+            .print-summary-value {
+                color: #FF6B00 !important;
+                font-weight: 700;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* Page break control */
+            .results-section {
+                page-break-before: avoid;
+            }
+
+            #detailedReportProjection {
+                page-break-before: always;
+            }
+
+            #negotiationTableSection {
+                page-break-before: always;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid var(--gt-gray-light);
+            border-top: 4px solid var(--gt-orange);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 2rem auto;
+            display: none;
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .discount-summary {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .negotiation-table {
+                font-size: 0.85rem;
+            }
+
+            .negotiation-table th,
+            .negotiation-table td {
+                padding: 0.5rem;
+            }
+
+            /* Comparator Print Styles */
+            body.printing-comparison #projectionMode,
+            body.printing-comparison #negotiationMode,
+            body.printing-comparison .mode-selector,
+            body.printing-comparison #scenarioSelectionArea,
+            body.printing-comparison #noScenariosMessage,
+            body.printing-comparison .btn,
+            body.printing-comparison .footer,
+            body.printing-comparison .indices-collapsible {
+                display: none !important;
+            }
+
+            body.printing-comparison #comparatorMode {
+                display: block !important;
+            }
+
+            body.printing-comparison #comparisonResults {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+
+            body.printing-comparison .comparison-table {
+                page-break-inside: avoid;
+                border: 2px solid #000 !important;
+            }
+
+            body.printing-comparison .comparison-table th {
+                background: linear-gradient(135deg, #FF6B00 0%, #E55F00 100%) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body.printing-comparison .best-value {
+                color: #00C853 !important;
+                font-weight: 900 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body.printing-comparison .worst-value {
+                color: #FF3D00 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo" style="padding: 1.5rem 0; display: flex; justify-content: center; align-items: center;">
+            <img src="https://i.imgur.com/nQsIerw.png" 
+                 alt="GT HOME Logo" 
+                 style="height: 70px; width: auto; max-width: 90%; object-fit: contain; filter: brightness(1.1) drop-shadow(2px 2px 4px rgba(0,0,0,0.3));"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div style="display: none; font-size: 2rem; font-weight: 900; letter-spacing: -0.5px;">
+                GT <span style="color: var(--gt-orange);">HOME</span>
+            </div>
+        </div>
+        <div class="subtitle">Sistema de Correção e Negociação</div>
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="mode-selector">
+        <button class="mode-btn active" id="projectionModeBtn">
+            <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            </span>
+            <div>
+                <span>Projeção de Unidade</span>
+                <span class="mode-description">Calcular correção e evolução</span>
+            </div>
+        </button>
+        <button class="mode-btn" id="quickProposalModeBtn">
+            <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                </svg>
+            </span>
+            <div>
+                <span>Simulação Rápida</span>
+                <span class="mode-description">Comparação Rápida de Cenários</span>
+            </div>
+        </button>
+        <button class="mode-btn" id="negotiationModeBtn">
+            <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+            </span>
+            <div>
+                <span>Negociação Cliente</span>
+                <span class="mode-description">Simular antecipação e descontos</span>
+            </div>
+        </button>
+        <button class="mode-btn" id="comparatorModeBtn">
+            <span class="mode-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="18"></rect>
+                    <rect x="14" y="8" width="7" height="13"></rect>
+                </svg>
+            </span>
+            <div>
+                <span>Comparar Cenários</span>
+                <span class="mode-description">Análise lado a lado</span>
+            </div>
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- PROJEÇÃO DE UNIDADE -->
+        <div class="content-area active" id="projectionMode">
+            <div class="projection-grid">
+                <!-- Configuração de Índices -->
+                <div class="section" style="grid-column: 1 / -1;">
+                    <div class="indices-collapsible">
+                        <div class="indices-header" id="indicesHeader">
+                            Configurar Índices (IPCA e CUB)
+                        </div>
+                        <div class="indices-content" id="indicesContent">
+                            <div class="split-inputs">
+                                <div class="form-group">
+                                    <label for="ipcaManual">IPCA Atual (%)</label>
+                                    <input type="number" id="ipcaManual" step="0.01" value="0.16" inputmode="decimal">
+                                </div>
+                                <div class="form-group">
+                                    <label for="cubManual">CUB Atual (%)</label>
+                                    <input type="number" id="cubManual" step="0.01" value="0.34" inputmode="decimal">
+                                </div>
+                            </div>
+                            <div class="split-inputs">
+                                <div class="form-group">
+                                    <label for="taxaReajuste">Taxa de Reajuste Adicional (%)</label>
+                                    <input type="number" id="taxaReajuste" step="0.01" value="0" inputmode="decimal">
+                                    <small style="opacity: 0.7; font-size: 0.75rem; display: block; margin-top: 0.3rem;">
+                                        Será somada aos índices selecionados abaixo
+                                    </small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Aplicar Taxa Em:</label>
+                                    <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem;">
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                            <input type="checkbox" id="aplicarTaxaIPCA" checked style="width: auto;">
+                                            <span>IPCA</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                            <input type="checkbox" id="aplicarTaxaCUB" style="width: auto;">
+                                            <span>CUB</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <small style="opacity: 0.7; font-size: 0.75rem; display: block; margin-top: 0.5rem;">
+                                * Valores negativos serão considerados como 0%
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nome da Simulação e Arredondamento -->
+                <div class="section" style="grid-column: 1 / -1;">
+                    <h2 class="section-title">Identificação e Arredondamento</h2>
+                    
+                    <div class="split-inputs">
+                        <div class="form-group">
+                            <label for="simulationName">
+                                Nome da Simulação
+                                <span class="tooltip" data-tip="Ex: Yacht 4502, Apto 1002, Cliente João">ℹ️</span>
+                            </label>
+                            <input type="text" id="simulationName" placeholder="Ex: Yacht 4502" maxlength="50">
+                            <small style="opacity: 0.7; font-size: 0.75rem; display: block; margin-top: 0.3rem;">
+                                Facilita identificação ao comparar cenários
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                Arredondamento de Valores
+                                <span class="tooltip" data-tip="Arredonda valores para facilitar comunicação">ℹ️</span>
+                            </label>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                    <input type="checkbox" id="enableRounding" style="width: auto;">
+                                    <span>Ativar</span>
+                                </label>
+                                <select id="roundingValue" style="flex: 1; padding: 0.5rem; background: var(--gt-gray); border: 1px solid var(--gt-border); border-radius: 6px; color: var(--gt-white);" disabled>
+                                    <option value="10">R$ 10,00</option>
+                                    <option value="50" selected>R$ 50,00</option>
+                                    <option value="100">R$ 100,00</option>
+                                    <option value="500">R$ 500,00</option>
+                                    <option value="1000">R$ 1.000,00</option>
+                                </select>
+                                <select id="roundingDirection" style="flex: 1; padding: 0.5rem; background: var(--gt-gray); border: 1px solid var(--gt-border); border-radius: 6px; color: var(--gt-white);" disabled>
+                                    <option value="up" selected>Para cima</option>
+                                    <option value="down">Para baixo</option>
+                                    <option value="nearest">Mais próximo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="roundingOptionsGroup" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(255, 107, 0, 0.1); border-radius: 8px; border: 1px solid var(--gt-orange);">
+                        <label style="margin-bottom: 0.75rem; display: block;">
+                            Aplicar Arredondamento Em:
+                            <span class="tooltip" data-tip="Escolha quais tipos de valores serão arredondados">ℹ️</span>
+                        </label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem;">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                <input type="checkbox" id="roundParcelas" checked style="width: auto;">
+                                <span>Parcelas</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                <input type="checkbox" id="roundReforcos" checked style="width: auto;">
+                                <span>Reforços</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                <input type="checkbox" id="roundChaves" checked style="width: auto;">
+                                <span>Chaves</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0; text-transform: none; font-weight: 500;">
+                                <input type="checkbox" id="roundEntrada" style="width: auto;">
+                                <span>Entrada</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modo de Entrada -->
+                <div class="section">
+                    <h2 class="section-title">Modo de Entrada</h2>
+                    
+                    <div class="input-mode-toggle">
+                        <button class="toggle-option active" id="modeReais">R$</button>
+                        <button class="toggle-option" id="modePercent">%</button>
+                    </div>
+
+                    <!-- Modo R$ -->
+                    <div id="reaisInputs">
+                        <div class="form-group">
+                            <label for="entradaValor">Entrada (R$)</label>
+                            <input type="text" id="entradaValor" placeholder="0,00" class="money-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="parcelaValor">Valor Parcela Mensal (R$)</label>
+                            <input type="text" id="parcelaValor" placeholder="0,00" class="money-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="qtdParcelas">Quantidade de Parcelas</label>
+                            <input type="number" id="qtdParcelas" placeholder="36" min="1" max="180" value="36" inputmode="numeric">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="qtdReforcosManual">Quantidade de Reforços</label>
+                            <input type="number" id="qtdReforcosManual" placeholder="0" min="0" max="20" value="0" inputmode="numeric">
+                        </div>
+
+                        <div id="reforcosIndividuaisContainer"></div>
+
+                        <div class="form-group">
+                            <label for="chavesValor">Chaves (R$)</label>
+                            <input type="text" id="chavesValor" placeholder="0,00" class="money-input">
+                        </div>
+
+                        <div class="result-card" style="margin-top: 1rem;">
+                            <div class="result-label">Valor Total Negociação</div>
+                            <div class="result-value" id="totalNegociacaoReais">R$ 0,00</div>
+                        </div>
+                    </div>
+
+                    <!-- Modo % -->
+                    <div id="percentInputs" style="display: none;">
+                        <div class="form-group">
+                            <label for="valorTotalNegociacao">Valor Total da Negociação (R$) <span class="required">*</span></label>
+                            <input type="text" id="valorTotalNegociacao" placeholder="0,00" class="money-input">
+                        </div>
+
+                        <!-- Entrada -->
+                        <div class="form-group">
+                            <label for="entradaPercent">
+                                Entrada (%)
+                                <span class="tooltip" data-tip="Percentual da entrada">ℹ️</span>
+                            </label>
+                            <input type="number" id="entradaPercent" placeholder="20" min="0" max="100" step="0.01" inputmode="decimal">
+                        </div>
+
+                        <!-- Parcelas - Quantidade e % na mesma linha -->
+                        <div class="form-group">
+                            <label>
+                                Parcelas (Quantidade e % Total)
+                                <span class="tooltip" data-tip="Número de parcelas e percentual total">ℹ️</span>
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <input type="number" id="qtdParcelasPercent" placeholder="36" min="1" max="180" value="36" inputmode="numeric" style="text-align: center;">
+                                <input type="number" id="parcelasPercent" placeholder="60" min="0" max="100" step="0.01" inputmode="decimal" style="text-align: center;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.3rem;">
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">Quantidade</small>
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">% Total</small>
+                            </div>
+                        </div>
+
+                        <!-- Reforços - Quantidade e % na mesma linha -->
+                        <div class="form-group">
+                            <label>
+                                Reforços (Quantidade e % Total)
+                                <span class="tooltip" data-tip="Número de reforços e % total (distribuído automaticamente)">ℹ️</span>
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <input type="number" id="qtdReforcosPercent" placeholder="0" min="0" max="20" value="0" inputmode="numeric" style="text-align: center;">
+                                <input type="number" id="reforcosPercentTotal" placeholder="0" min="0" max="100" step="0.01" value="0" inputmode="decimal" style="text-align: center;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.3rem;">
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">Quantidade</small>
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">% Total</small>
+                            </div>
+                            <small style="opacity: 0.7; font-size: 0.75rem; display: block; margin-top: 0.5rem; background: rgba(255,107,0,0.1); padding: 0.5rem; border-radius: 4px; border-left: 3px solid var(--gt-orange);">
+                                💡 O sistema distribui o % igualmente entre os reforços e solicita as datas
+                            </small>
+                        </div>
+
+                        <!-- Container para datas de reforços -->
+                        <div id="reforcosIndividuaisContainerPercent"></div>
+
+                        <!-- Chaves - % e Data na mesma linha -->
+                        <div class="form-group">
+                            <label>
+                                Chaves (% e Data)
+                                <span class="tooltip" data-tip="Percentual e data de entrega das chaves">ℹ️</span>
+                            </label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <input type="number" id="chavesPercent" placeholder="20" min="0" max="100" step="0.01" inputmode="decimal" style="text-align: center;">
+                                <input type="text" id="chavesDataPercent" class="date-input" placeholder="MM/AA" maxlength="5" style="text-align: center;">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.3rem;">
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">% do Total</small>
+                                <small style="opacity: 0.7; font-size: 0.7rem; text-align: center;">Mês/Ano</small>
+                            </div>
+                        </div>
+
+                        <div id="percentValidation" class="validation-msg" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Informações do Imóvel -->
+                <div class="section">
+                    <h2 class="section-title">Informações do Imóvel</h2>
+
+                    <div class="form-group">
+                        <label for="tipoImovel">Tipo de Imóvel</label>
+                        <select id="tipoImovel">
+                            <option value="pronto">Imóvel Pronto</option>
+                            <option value="obras">Em Obras</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="dataEntregaGroup" style="display: none;">
+                        <label for="dataEntrega">Data de Entrega/Chaves (MM/AA)</label>
+                        <input type="text" id="dataEntrega" placeholder="12/26" maxlength="5">
+                    </div>
+
+                    <div class="form-group" id="dataChavesGroup">
+                        <label for="dataChaves">Data das Chaves (MM/AA)</label>
+                        <input type="text" id="dataChaves" placeholder="02/28" maxlength="5">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dataInicio">Data de Início (MM/AA)</label>
+                        <input type="text" id="dataInicio" placeholder="02/26" maxlength="5">
+                    </div>
+
+                    <button class="btn" id="calcularProjecaoBtn">
+                        <span class="btn-text">Calcular Projeção</span>
+                        <span class="btn-loading">
+                            <span class="btn-spinner"></span>
+                            Calculando...
+                        </span>
+                    </button>
+                    <button class="btn btn-secondary" id="limparProjecaoBtn">Limpar</button>
+                </div>
+
+                <!-- Resultados Projeção -->
+                <div class="results-section" id="resultsProjection">
+                    <!-- Print Summary (visible only on print) -->
+                    <div class="print-summary" style="display: none;" id="printSummary">
+                        <h3>Resumo da Proposta</h3>
+                        <div class="print-summary-grid" id="printSummaryContent"></div>
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">Resultados da Projeção</h2>
+                        <div class="results-grid" id="resultsGridProjection"></div>
+                        <button class="btn" id="verDetalhesProjecao">Ver Extrato Completo</button>
+                        <button class="btn btn-secondary" id="imprimirProjecao">Imprimir</button>
+                    </div>
+
+                    <div class="section" id="detailedReportProjection" style="display: none;">
+                        <h2 class="section-title">Extrato Detalhado</h2>
+                        <div id="reportContentProjection"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEGOCIAÇÃO CLIENTE -->
+        <div class="content-area" id="negotiationMode">
+            <div class="section">
+                <h2 class="section-title">Selecionar Unidade</h2>
+                <div class="form-group">
+                    <label for="unidadeSelect">Unidade(s) Calculada(s)</label>
+                    <select id="unidadeSelect" multiple style="min-height: 120px;">
+                        <option value="" disabled>Nenhuma unidade calculada ainda</option>
+                    </select>
+                    <small style="opacity: 0.7; font-size: 0.75rem; display: block; margin-top: 0.5rem;">
+                        * Calcule uma projeção primeiro no modo "Projeção de Unidade"
+                    </small>
+                </div>
+            </div>
+
+            <div class="section" id="negotiationTableSection" style="display: none;">
+                <h2 class="section-title">Simulação de Antecipação</h2>
+                
+                <div class="discount-summary">
+                    <div class="summary-item">
+                        <div class="summary-label">Valor Atual (Sem Correção)</div>
+                        <div class="summary-value current" id="valorAtualSum">R$ 0,00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Valor Projetado (Corrigido)</div>
+                        <div class="summary-value projected" id="valorProjetadoSum">R$ 0,00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Desconto ao Antecipar</div>
+                        <div class="summary-value discount" id="descontoSum">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="negotiation-table-container">
+                    <table class="negotiation-table">
+                        <thead>
+                            <tr>
+                                <th class="checkbox-cell">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th>Mês</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Valor Atual</th>
+                                <th>Valor Corrigido</th>
+                                <th>Desconto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="negotiationTableBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <button class="btn" id="imprimirNegociacao" style="margin-top: 1.5rem;">Imprimir Simulação</button>
+            </div>
+        </div>
+
+        <!-- COMPARADOR DE CENÁRIOS -->
+        <div class="content-area" id="comparatorMode">
+            <div class="section">
+                <h2 class="section-title">⚖️ Comparar Cenários</h2>
+                
+                <p style="opacity: 0.8; margin-bottom: 1.5rem;">
+                    Selecione até 3 unidades calculadas para comparar lado a lado. Isso ajuda a identificar qual proposta é mais vantajosa.
+                </p>
+
+                <div id="scenarioSelectionArea">
+                    <div class="comparator-grid" id="scenarioCards">
+                        <!-- Cenários disponíveis aparecerão aqui -->
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <button class="btn" id="compareBtn" style="display: none;">
+                            <span class="btn-text">Comparar Selecionados</span>
+                            <span class="btn-loading">
+                                <span class="btn-spinner"></span>
+                                Comparando...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="comparisonResults" style="display: none;">
+                    <div style="background: rgba(255, 107, 0, 0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid var(--gt-orange);">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--gt-orange);">
+                            💡 Análise Rápida
+                        </h3>
+                        <p id="comparisonRecommendation" style="opacity: 0.9; line-height: 1.6;"></p>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="comparison-table" id="comparisonTable">
+                            <!-- Tabela de comparação será gerada aqui -->
+                        </table>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center;">
+                        <button class="btn btn-secondary" id="newComparisonBtn">
+                            Nova Comparação
+                        </button>
+                        <button class="btn" id="exportComparisonBtn">
+                            📄 Exportar PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div id="noScenariosMessage" style="text-align: center; padding: 3rem; opacity: 0.6;">
+                    <p style="font-size: 1.2rem; margin-bottom: 0.5rem;">📊</p>
+                    <p>Nenhuma unidade calculada ainda.</p>
+                    <p style="font-size: 0.9rem; margin-top: 0.5rem;">Crie projeções no modo "Projeção de Unidade" primeiro.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROPOSTA PADRÃO - "E SE...?" -->
+        <div class="content-area" id="quickProposalMode">
+            <div class="section">
+                <h2 class="section-title">⚡ Proposta Padrão - "E se...?"</h2>
+                
+                <p style="opacity: 0.8; margin-bottom: 1.5rem;">
+                    Compare rapidamente diferentes cenários de proposta. Ideal para negociações em tempo real!
+                </p>
+
+                <!-- Passo 1: Inserir Valor da Unidade -->
+                <div id="quickProposalStep1">
+                    <div style="max-width: 500px; margin: 0 auto; text-align: center; padding: 2rem;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">🏢</div>
+                        <h3 style="margin-bottom: 1.5rem;">Digite o Valor da Unidade</h3>
+                        
+                        <div class="form-group">
+                            <input type="text" 
+                                   id="quickProposalValue" 
+                                   class="money-input" 
+                                   placeholder="R$ 0,00"
+                                   style="font-size: 1.5rem; text-align: center; padding: 1.5rem;">
+                        </div>
+
+                        <button class="btn" onclick="gerarPropostaPadrao()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                            Gerar Proposta Padrão
+                        </button>
+
+                        <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,107,0,0.1); border-radius: 8px; text-align: left;">
+                            <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 0.5rem;"><strong>📋 Proposta Padrão:</strong></p>
+                            <ul style="font-size: 0.85rem; opacity: 0.7; line-height: 1.8; padding-left: 1.5rem;">
+                                <li>Entrada: 50% do valor</li>
+                                <li>Parcelas: 36x (25% do valor)</li>
+                                <li>3 Reforços (25% do valor total)</li>
+                                <li>Correção: IPCA + 0,89%</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 2: Exibir Cenários e Comparação -->
+                <div id="quickProposalStep2" style="display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <h3 style="margin: 0;">📊 Comparação de Cenários</h3>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="voltarInicio()" style="font-size: 0.9rem;">
+                                ← Novo Valor
+                            </button>
+                            <button class="btn" onclick="adicionarCenario()" id="addScenarioBtn" style="font-size: 0.9rem;">
+                                + Adicionar Cenário
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Grid de Cenários -->
+                    <div id="quickScenariosGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <!-- Cenários serão adicionados aqui -->
+                    </div>
+
+                    <!-- Botão Comparar (aparece quando tem 2+ cenários) -->
+                    <div style="text-align: center; margin: 2rem 0;" id="compareButtonArea" style="display: none;">
+                        <button class="btn" onclick="compararCenariosRapidos()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                            ⚖️ Comparar Todos os Cenários
+                        </button>
+                    </div>
+
+                    <!-- Resultado da Comparação -->
+                    <div id="quickComparisonResult" style="display: none;">
+                        <div style="background: linear-gradient(135deg, var(--gt-orange) 0%, #E55F00 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+                            <h3 style="margin-bottom: 1rem; font-size: 1.3rem;">💡 Análise Comparativa</h3>
+                            <div id="quickComparisonRecommendation" style="line-height: 1.6;"></div>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table class="comparison-table" id="quickComparisonTable">
+                                <!-- Tabela será gerada aqui -->
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spinner" id="spinner"></div>
+
+        <div class="footer">
+            GT HOME © 2025 - Todos os direitos reservados
+        </div>
+    </div>
+
+    <script>
+        // Prevenir comportamento padrão do iOS
+        document.addEventListener('touchstart', function(){}, {passive: true});
+
+        // Header compacto no scroll
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('.header');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > 100) {
+                header.classList.add('compact');
+            } else {
+                header.classList.remove('compact');
+            }
+        }, {passive: true});
+
+        // Dados históricos
+        const ipcaData = {
+            '01/2023': 0.53, '02/2023': 0.84, '03/2023': 0.71, '04/2023': 0.61,
+            '05/2023': 0.23, '06/2023': 0.12, '07/2023': 0.12, '08/2023': 0.23,
+            '09/2023': 0.26, '10/2023': 0.24, '11/2023': 0.28, '12/2023': 0.56,
+            '01/2024': 0.42, '02/2024': 0.83, '03/2024': 0.16, '04/2024': 0.38,
+            '05/2024': 0.46, '06/2024': 0.21, '07/2024': 0.38, '08/2024': 0.02,
+            '09/2024': 0.44, '10/2024': 0.56, '11/2024': 0.39, '12/2024': 0.52,
+            '01/2025': 0.16, '02/2025': 1.31, '03/2025': 0.56, '04/2025': 0.43,
+            '05/2025': 0.26, '06/2025': 0.24, '07/2025': 0.26, '08/2025': 0.11,
+            '09/2025': 0.48, '10/2025': 0.09, '11/2025': 0.18, '12/2025': 0.33,
+            '01/2026': 0.16
+        };
+
+        const cubData = {
+            '01/2023': 0.28, '02/2023': 0.31, '03/2023': 0.29, '04/2023': 0.27,
+            '05/2023': 0.30, '06/2023': 0.32, '07/2023': 0.33, '08/2023': 0.31,
+            '09/2023': 0.34, '10/2023': 0.33, '11/2023': 0.30, '12/2023': 0.32,
+            '01/2024': 0.30, '02/2024': 0.29, '03/2024': 0.33, '04/2024': 0.30,
+            '05/2024': 0.29, '06/2024': 0.31, '07/2024': 0.33, '08/2024': 0.30,
+            '09/2024': 0.33, '10/2024': 0.33, '11/2024': 0.30, '12/2024': 0.33,
+            '01/2025': 0.31, '02/2025': 0.35, '03/2025': 0.34, '04/2025': 0.34,
+            '05/2025': 0.32, '06/2025': 0.33, '07/2025': 0.34, '08/2025': 0.33,
+            '09/2025': 0.34, '10/2025': 0.34, '11/2025': 0.33, '12/2025': 0.34,
+            '01/2026': 0.34
+        };
+
+        let lastPositiveIPCA = 0.56;
+        for (let key in ipcaData) {
+            if (ipcaData[key] > 0) lastPositiveIPCA = ipcaData[key];
+        }
+
+        // Storage para unidades calculadas
+        let unidadesCalculadas = [];
+
+        // Função de arredondamento
+        function arredondarValor(valor, config) {
+            if (!config || !config.ativo) return valor;
+            
+            const multiplo = parseFloat(config.multiplo) || 50;
+            
+            switch(config.direcao) {
+                case 'up':
+                    return Math.ceil(valor / multiplo) * multiplo;
+                case 'down':
+                    return Math.floor(valor / multiplo) * multiplo;
+                case 'nearest':
+                default:
+                    return Math.round(valor / multiplo) * multiplo;
+            }
+        }
+
+        // Obter configuração de arredondamento
+        function getConfigArredondamento() {
+            const enabled = document.getElementById('enableRounding')?.checked || false;
+            if (!enabled) return { ativo: false };
+            
+            return {
+                ativo: true,
+                multiplo: document.getElementById('roundingValue')?.value || '50',
+                direcao: document.getElementById('roundingDirection')?.value || 'up',
+                aplicarParcelas: document.getElementById('roundParcelas')?.checked || false,
+                aplicarReforcos: document.getElementById('roundReforcos')?.checked || false,
+                aplicarChaves: document.getElementById('roundChaves')?.checked || false,
+                aplicarEntrada: document.getElementById('roundEntrada')?.checked || false
+            };
+        }
+
+        // Aplicar arredondamento baseado no tipo
+        function aplicarArredondamento(valor, tipo, config) {
+            if (!config || !config.ativo) return valor;
+            
+            const deveArredondar = 
+                (tipo === 'parcela' && config.aplicarParcelas) ||
+                (tipo === 'reforco' && config.aplicarReforcos) ||
+                (tipo === 'chaves' && config.aplicarChaves) ||
+                (tipo === 'entrada' && config.aplicarEntrada);
+            
+            return deveArredondar ? arredondarValor(valor, config) : valor;
+        }
+
+        // Auto-save
+        function autoSave() {
+            try {
+                const estado = {
+                    timestamp: Date.now(),
+                    unidades: unidadesCalculadas
+                };
+                localStorage.setItem('gt_autosave', JSON.stringify(estado));
+            } catch (e) {
+                console.error('Erro ao salvar:', e);
+            }
+        }
+
+        // Recuperar auto-save
+        function recuperarAutoSave() {
+            try {
+                const saved = localStorage.getItem('gt_autosave');
+                if (saved) {
+                    const estado = JSON.parse(saved);
+                    const minutos = Math.floor((Date.now() - estado.timestamp) / 60000);
+                    
+                    if (minutos < 60 && estado.unidades && estado.unidades.length > 0) {
+                        if (confirm(`Encontramos ${estado.unidades.length} cálculo(s) salvos há ${minutos} minuto(s). Recuperar?`)) {
+                            unidadesCalculadas = estado.unidades;
+                            return true;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Erro ao recuperar:', e);
+            }
+            return false;
+        }
+
+        // Atalhos de teclado
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+S: Salvar
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    autoSave();
+                    const toast = document.createElement('div');
+                    toast.textContent = '✅ Salvos!';
+                    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:var(--success);color:white;padding:1rem 1.5rem;border-radius:8px;z-index:10000;animation:fadeIn 0.3s';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                }
+                
+                // Ctrl+Enter: Calcular
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    const calcBtn = document.getElementById('calcularProjecaoBtn');
+                    if (calcBtn && !calcBtn.classList.contains('loading')) {
+                        calcBtn.click();
+                    }
+                }
+            });
+        }
+
+        // Funções utilitárias
+        function formatarMoeda(valor) {
+            return valor.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function formatarInputMoeda(valor) {
+            valor = valor.replace(/\D/g, '');
+            valor = (parseInt(valor || 0) / 100).toFixed(2);
+            valor = valor.replace('.', ',');
+            valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            return valor;
+        }
+
+        function parseValorMoeda(valor) {
+            if (!valor) return 0;
+            return parseFloat(valor.replace(/\./g, '').replace(',', '.')) || 0;
+        }
+
+        function getNextMonth(mesAno) {
+            const [mes, ano] = mesAno.split('/');
+            let mesInt = parseInt(mes);
+            let anoInt = parseInt(ano);
+            mesInt++;
+            if (mesInt > 12) {
+                mesInt = 1;
+                anoInt++;
+            }
+            return `${String(mesInt).padStart(2, '0')}/${String(anoInt).padStart(2, '0')}`;
+        }
+
+        function compararDatas(data1, data2) {
+            const [m1, a1] = data1.split('/').map(Number);
+            const [m2, a2] = data2.split('/').map(Number);
+            const ano1 = a1 < 50 ? 2000 + a1 : 1900 + a1;
+            const ano2 = a2 < 50 ? 2000 + a2 : 1900 + a2;
+            if (ano1 !== ano2) return ano1 - ano2;
+            return m1 - m2;
+        }
+
+        function getIndiceCorrecao(mesAno, tipoImovel, mesEntrega, mesChaves) {
+            const taxaReajuste = parseFloat(document.getElementById('taxaReajuste').value) || 0;
+            const aplicarTaxaIPCA = document.getElementById('aplicarTaxaIPCA').checked;
+            const aplicarTaxaCUB = document.getElementById('aplicarTaxaCUB').checked;
+            
+            if (mesChaves && compararDatas(mesAno, mesChaves) >= 0) {
+                const ipcaManual = parseFloat(document.getElementById('ipcaManual').value) || 0;
+                const ipca = ipcaData[mesAno] !== undefined ? ipcaData[mesAno] : Math.max(0, ipcaManual);
+                const ipcaFinal = Math.max(ipca > 0 ? ipca : lastPositiveIPCA, 0);
+                return aplicarTaxaIPCA ? ipcaFinal + taxaReajuste : ipcaFinal;
+            }
+
+            if (tipoImovel === 'obras') {
+                if (mesEntrega && compararDatas(mesAno, mesEntrega) <= 0) {
+                    const cubManual = parseFloat(document.getElementById('cubManual').value) || 0;
+                    const cub = cubData[mesAno] !== undefined ? cubData[mesAno] : Math.max(0, cubManual);
+                    const cubFinal = Math.max(0, cub);
+                    return aplicarTaxaCUB ? cubFinal + taxaReajuste : cubFinal;
+                } else {
+                    const ipcaManual = parseFloat(document.getElementById('ipcaManual').value) || 0;
+                    const ipca = ipcaData[mesAno] !== undefined ? ipcaData[mesAno] : Math.max(0, ipcaManual);
+                    const ipcaFinal = Math.max(ipca > 0 ? ipca : lastPositiveIPCA, 0);
+                    return aplicarTaxaIPCA ? ipcaFinal + taxaReajuste : ipcaFinal;
+                }
+            } else {
+                const ipcaManual = parseFloat(document.getElementById('ipcaManual').value) || 0;
+                const ipca = ipcaData[mesAno] !== undefined ? ipcaData[mesAno] : Math.max(0, ipcaManual);
+                const ipcaFinal = Math.max(ipca > 0 ? ipca : lastPositiveIPCA, 0);
+                return aplicarTaxaIPCA ? ipcaFinal + taxaReajuste : ipcaFinal;
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-preencher data de início
+            const hoje = new Date();
+            const proximoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+            const mm = String(proximoMes.getMonth() + 1).padStart(2, '0');
+            const yy = String(proximoMes.getFullYear()).slice(-2);
+            document.getElementById('dataInicio').value = `${mm}/${yy}`;
+
+            // Recuperar auto-save
+            recuperarAutoSave();
+            
+            // Setup atalhos de teclado
+            setupKeyboardShortcuts();
+
+            // Event listener para arredondamento
+            const enableRoundingCheckbox = document.getElementById('enableRounding');
+            const roundingValue = document.getElementById('roundingValue');
+            const roundingDirection = document.getElementById('roundingDirection');
+            const roundingOptionsGroup = document.getElementById('roundingOptionsGroup');
+            
+            enableRoundingCheckbox.addEventListener('change', function() {
+                const enabled = this.checked;
+                roundingValue.disabled = !enabled;
+                roundingDirection.disabled = !enabled;
+                roundingOptionsGroup.style.display = enabled ? 'block' : 'none';
+            });
+
+            // Mode Selector
+            document.getElementById('projectionModeBtn').addEventListener('click', function() {
+                document.getElementById('projectionModeBtn').classList.add('active');
+                document.getElementById('quickProposalModeBtn').classList.remove('active');
+                document.getElementById('negotiationModeBtn').classList.remove('active');
+                document.getElementById('comparatorModeBtn').classList.remove('active');
+                document.getElementById('projectionMode').classList.add('active');
+                document.getElementById('quickProposalMode').classList.remove('active');
+                document.getElementById('negotiationMode').classList.remove('active');
+                document.getElementById('comparatorMode').classList.remove('active');
+            });
+
+            document.getElementById('quickProposalModeBtn').addEventListener('click', function() {
+                document.getElementById('quickProposalModeBtn').classList.add('active');
+                document.getElementById('projectionModeBtn').classList.remove('active');
+                document.getElementById('negotiationModeBtn').classList.remove('active');
+                document.getElementById('comparatorModeBtn').classList.remove('active');
+                document.getElementById('quickProposalMode').classList.add('active');
+                document.getElementById('projectionMode').classList.remove('active');
+                document.getElementById('negotiationMode').classList.remove('active');
+                document.getElementById('comparatorMode').classList.remove('active');
+            });
+
+            document.getElementById('negotiationModeBtn').addEventListener('click', function() {
+                document.getElementById('negotiationModeBtn').classList.add('active');
+                document.getElementById('projectionModeBtn').classList.remove('active');
+                document.getElementById('quickProposalModeBtn').classList.remove('active');
+                document.getElementById('comparatorModeBtn').classList.remove('active');
+                document.getElementById('negotiationMode').classList.add('active');
+                document.getElementById('projectionMode').classList.remove('active');
+                document.getElementById('quickProposalMode').classList.remove('active');
+                document.getElementById('comparatorMode').classList.remove('active');
+            });
+
+            document.getElementById('comparatorModeBtn').addEventListener('click', function() {
+                document.getElementById('comparatorModeBtn').classList.add('active');
+                document.getElementById('projectionModeBtn').classList.remove('active');
+                document.getElementById('quickProposalModeBtn').classList.remove('active');
+                document.getElementById('negotiationModeBtn').classList.remove('active');
+                document.getElementById('comparatorMode').classList.add('active');
+                document.getElementById('projectionMode').classList.remove('active');
+                document.getElementById('quickProposalMode').classList.remove('active');
+                document.getElementById('negotiationMode').classList.remove('active');
+                carregarComparador();
+            });
+
+            // Toggle Índices
+            document.getElementById('indicesHeader').addEventListener('click', function() {
+                this.classList.toggle('active');
+                document.getElementById('indicesContent').classList.toggle('active');
+            });
+
+            // Toggle R$ / %
+            document.getElementById('modeReais').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('modePercent').classList.remove('active');
+                document.getElementById('reaisInputs').style.display = 'block';
+                document.getElementById('percentInputs').style.display = 'none';
+            });
+
+            document.getElementById('modePercent').addEventListener('click', function() {
+                this.classList.add('active');
+                document.getElementById('modeReais').classList.remove('active');
+                document.getElementById('percentInputs').style.display = 'block';
+                document.getElementById('reaisInputs').style.display = 'none';
+            });
+
+            // Tipo de imóvel
+            document.getElementById('tipoImovel').addEventListener('change', function() {
+                const isObras = this.value === 'obras';
+                document.getElementById('dataEntregaGroup').style.display = isObras ? 'block' : 'none';
+                document.getElementById('dataChavesGroup').style.display = isObras ? 'none' : 'block';
+            });
+
+            // Formatação de moeda
+            document.querySelectorAll('.money-input').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    e.target.value = formatarInputMoeda(e.target.value);
+                    if (document.getElementById('modeReais').classList.contains('active')) {
+                        calcularTotalNegociacaoReais();
+                    }
+                });
+
+                input.addEventListener('blur', function(e) {
+                    if (!e.target.value) e.target.value = '0,00';
+                });
+
+                input.addEventListener('focus', function(e) {
+                    if (e.target.value === '0,00') e.target.value = '';
+                });
+            });
+
+            // Formatação de data MM/AA
+            document.querySelectorAll('input[maxlength="5"]').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            });
+
+            // Atualizar qtd reforços
+            document.getElementById('qtdParcelas').addEventListener('change', calcularTotalNegociacaoReais);
+
+            // Criar campos de reforços individuais
+            document.getElementById('qtdReforcosManual').addEventListener('input', function() {
+                criarCamposReforcosIndividuais(this.value, 'reais');
+            });
+
+            document.getElementById('qtdReforcosPercent').addEventListener('input', function() {
+                criarCamposReforcosIndividuais(this.value, 'percent');
+            });
+
+            // Validação de porcentagens
+            ['entradaPercent', 'parcelasPercent', 'reforcosPercentTotal', 'chavesPercent'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', validarPorcentagens);
+                }
+            });
+
+            // Botões
+            const calcularProjecaoBtn = document.getElementById('calcularProjecaoBtn');
+            if (calcularProjecaoBtn) {
+                calcularProjecaoBtn.addEventListener('click', calcularProjecao);
+            }
+            
+            const limparProjecaoBtn = document.getElementById('limparProjecaoBtn');
+            if (limparProjecaoBtn) {
+                limparProjecaoBtn.addEventListener('click', limparProjecao);
+            }
+            
+            const verDetalhesProjecao = document.getElementById('verDetalhesProjecao');
+            if (verDetalhesProjecao) {
+                verDetalhesProjecao.addEventListener('click', mostrarDetalhesProjecao);
+            }
+            
+            const imprimirProjecao = document.getElementById('imprimirProjecao');
+            if (imprimirProjecao) {
+                imprimirProjecao.addEventListener('click', imprimirExtrato);
+            }
+            
+            const imprimirNegociacao = document.getElementById('imprimirNegociacao');
+            if (imprimirNegociacao) {
+                imprimirNegociacao.addEventListener('click', imprimirExtrato);
+            }
+
+            // Select all checkbox
+            document.getElementById('selectAll').addEventListener('change', function() {
+                document.querySelectorAll('.negotiation-table tbody input[type="checkbox"]').forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                calcularDescontoTotal();
+            });
+
+            // Seleção de unidade
+            document.getElementById('unidadeSelect').addEventListener('change', carregarUnidadeNegociacao);
+        });
+
+        // Criar campos individuais de reforços
+        function criarCamposReforcosIndividuais(quantidade, modo) {
+            const qtd = parseInt(quantidade) || 0;
+            const containerId = modo === 'reais' ? 'reforcosIndividuaisContainer' : 'reforcosIndividuaisContainerPercent';
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= qtd; i++) {
+                const div = document.createElement('div');
+                div.className = 'reforco-item';
+                
+                if (modo === 'reais') {
+                    div.innerHTML = `
+                        <div class="reforco-item-title">Reforço ${i}</div>
+                        <div class="reforco-fields">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="reforco${i}Valor">Valor (R$)</label>
+                                <input type="text" id="reforco${i}Valor" placeholder="0,00" class="money-input reforco-valor-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="reforco${i}Data">Data (MM/AA)</label>
+                                <input type="text" id="reforco${i}Data" placeholder="06/26" maxlength="5" class="reforco-data-input">
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="reforco-item-title">Reforço ${i}</div>
+                        <div class="reforco-fields">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="reforcoPercent${i}Valor">Porcentagem (%)</label>
+                                <input type="number" id="reforcoPercent${i}Valor" placeholder="0" min="0" max="100" step="0.01" inputmode="decimal" class="reforco-percent-input">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="reforcoPercent${i}Data">Data (MM/AA)</label>
+                                <input type="text" id="reforcoPercent${i}Data" placeholder="06/26" maxlength="5" class="reforco-data-input">
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                container.appendChild(div);
+            }
+            
+            // Adicionar formatação de moeda aos novos inputs
+            container.querySelectorAll('.money-input').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    e.target.value = formatarInputMoeda(e.target.value);
+                    calcularTotalNegociacaoReais();
+                });
+                input.addEventListener('blur', function(e) {
+                    if (!e.target.value) e.target.value = '0,00';
+                });
+                input.addEventListener('focus', function(e) {
+                    if (e.target.value === '0,00') e.target.value = '';
+                });
+            });
+            
+            // Adicionar formatação de data aos novos inputs
+            container.querySelectorAll('.reforco-data-input').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            });
+            
+            // Adicionar event listener para porcentagens
+            container.querySelectorAll('.reforco-percent-input').forEach(input => {
+                input.addEventListener('input', validarPorcentagens);
+            });
+            
+            if (modo === 'reais') {
+                calcularTotalNegociacaoReais();
+            } else {
+                validarPorcentagens();
+            }
+        }
+
+        // Calcular total no modo R$
+        function calcularTotalNegociacaoReais() {
+            const entrada = parseValorMoeda(document.getElementById('entradaValor').value);
+            const parcela = parseValorMoeda(document.getElementById('parcelaValor').value);
+            const qtdParcelas = parseInt(document.getElementById('qtdParcelas').value) || 0;
+            const chaves = parseValorMoeda(document.getElementById('chavesValor').value);
+
+            const totalParcelas = parcela * qtdParcelas;
+            
+            // Somar todos os reforços individuais
+            let totalReforcos = 0;
+            const qtdReforcos = parseInt(document.getElementById('qtdReforcosManual').value) || 0;
+            for (let i = 1; i <= qtdReforcos; i++) {
+                const reforcoInput = document.getElementById(`reforco${i}Valor`);
+                if (reforcoInput) {
+                    totalReforcos += parseValorMoeda(reforcoInput.value);
+                }
+            }
+
+            const total = entrada + totalParcelas + totalReforcos + chaves;
+            document.getElementById('totalNegociacaoReais').textContent = `R$ ${formatarMoeda(total)}`;
+        }
+
+        // Validar porcentagens
+        function validarPorcentagens() {
+            const entrada = parseFloat(document.getElementById('entradaPercent').value) || 0;
+            const parcelas = parseFloat(document.getElementById('parcelasPercent').value) || 0;
+            const reforcosTotal = parseFloat(document.getElementById('reforcosPercentTotal').value) || 0;
+            const chaves = parseFloat(document.getElementById('chavesPercent').value) || 0;
+
+            const total = entrada + parcelas + reforcosTotal + chaves;
+            const msgDiv = document.getElementById('percentValidation');
+
+            if (total === 0) {
+                msgDiv.style.display = 'none';
+                return false;
+            }
+
+            if (Math.abs(total - 100) < 0.01) {
+                msgDiv.textContent = `✓ Total: ${total.toFixed(2)}% - Validado!`;
+                msgDiv.className = 'validation-msg success';
+                msgDiv.style.display = 'block';
+                return true;
+            } else {
+                msgDiv.textContent = `✗ Total: ${total.toFixed(2)}% - Deve ser 100%`;
+                msgDiv.className = 'validation-msg error';
+                msgDiv.style.display = 'block';
+                return false;
+            }
+        }
+
+        // Calcular projeção
+        function calcularProjecao() {
+            try {
+                // Adicionar loading ao botão
+                const calcBtn = document.getElementById('calcularProjecaoBtn');
+                if (calcBtn) calcBtn.classList.add('loading');
+                
+                console.log('=== INICIANDO CÁLCULO ===');
+                const modoReais = document.getElementById('modeReais').classList.contains('active');
+                console.log('Modo:', modoReais ? 'R$' : '%');
+                
+                let entrada, valorParcela, qtdParcelas, chaves, reforcosIndividuais = [];
+
+            if (modoReais) {
+                console.log('Modo R$ selecionado');
+                entrada = parseValorMoeda(document.getElementById('entradaValor').value);
+                valorParcela = parseValorMoeda(document.getElementById('parcelaValor').value);
+                qtdParcelas = parseInt(document.getElementById('qtdParcelas').value) || 0;
+                chaves = parseValorMoeda(document.getElementById('chavesValor').value);
+                
+                console.log('Valores:', {entrada, valorParcela, qtdParcelas, chaves});
+                
+                // Coletar reforços individuais
+                const qtdReforcos = parseInt(document.getElementById('qtdReforcosManual').value) || 0;
+                console.log('Quantidade de reforços:', qtdReforcos);
+                
+                for (let i = 1; i <= qtdReforcos; i++) {
+                    const valorInput = document.getElementById(`reforco${i}Valor`);
+                    const dataInput = document.getElementById(`reforco${i}Data`);
+                    if (valorInput && dataInput && dataInput.value) {
+                        reforcosIndividuais.push({
+                            numero: i,
+                            valor: parseValorMoeda(valorInput.value),
+                            data: dataInput.value
+                        });
+                    }
+                }
+                console.log('Reforços coletados:', reforcosIndividuais);
+            } else {
+                if (!validarPorcentagens()) {
+                    alert('A soma das porcentagens deve ser 100%');
+                    return;
+                }
+
+                const valorTotal = parseValorMoeda(document.getElementById('valorTotalNegociacao').value);
+                if (valorTotal === 0) {
+                    alert('Informe o valor total da negociação');
+                    return;
+                }
+
+                qtdParcelas = parseInt(document.getElementById('qtdParcelasPercent').value) || 0;
+
+                const percEntrada = parseFloat(document.getElementById('entradaPercent').value) || 0;
+                const percParcelas = parseFloat(document.getElementById('parcelasPercent').value) || 0;
+                const percChaves = parseFloat(document.getElementById('chavesPercent').value) || 0;
+
+                entrada = (valorTotal * percEntrada / 100);
+                const totalParcelas = (valorTotal * percParcelas / 100);
+                valorParcela = qtdParcelas > 0 ? totalParcelas / qtdParcelas : 0;
+                chaves = (valorTotal * percChaves / 100);
+                
+                // Coletar reforços individuais do modo percent
+                const qtdReforcos = parseInt(document.getElementById('qtdReforcosPercent').value) || 0;
+                for (let i = 1; i <= qtdReforcos; i++) {
+                    const percentInput = document.getElementById(`reforcoPercent${i}Valor`);
+                    const dataInput = document.getElementById(`reforcoPercent${i}Data`);
+                    if (percentInput && dataInput && dataInput.value) {
+                        const percReforco = parseFloat(percentInput.value) || 0;
+                        reforcosIndividuais.push({
+                            numero: i,
+                            valor: (valorTotal * percReforco / 100),
+                            data: dataInput.value
+                        });
+                    }
+                }
+            }
+
+            const tipoImovel = document.getElementById('tipoImovel').value;
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataEntrega = document.getElementById('dataEntrega').value;
+            
+            // Se em obras, usa dataEntrega como dataChaves. Se pronto, usa dataChaves
+            const dataChaves = tipoImovel === 'obras' ? dataEntrega : document.getElementById('dataChaves').value;
+
+            console.log('Dados do imóvel:', {tipoImovel, dataInicio, dataEntrega, dataChaves, qtdParcelas});
+
+            // Validação: precisa de data de início e pelo menos algum valor (entrada, parcelas, reforços ou chaves)
+            const temAlgumValor = entrada > 0 || (qtdParcelas > 0 && valorParcela > 0) || reforcosIndividuais.length > 0 || chaves > 0;
+            
+            if (!dataInicio) {
+                console.error('Validação falhou: falta data de início');
+                alert('Preencha a data de início');
+                return;
+            }
+            
+            if (!temAlgumValor) {
+                console.error('Validação falhou: nenhum valor informado');
+                alert('Informe pelo menos um valor (entrada, parcelas, reforços ou chaves)');
+                return;
+            }
+
+            console.log('Validação OK, iniciando spinner...');
+            document.getElementById('spinner').classList.add('active');
+
+            console.log('Iniciando setTimeout para cálculos...');
+            setTimeout(() => {
+                console.log('Dentro do setTimeout, iniciando cálculos de parcelas...');
+                
+                // Obter configuração de arredondamento
+                const configArredondamento = getConfigArredondamento();
+                
+                let mesAtual = dataInicio;
+                let parcelas = [];
+                let reforcos = [];
+
+                // Só calcular parcelas se houver quantidade definida
+                if (qtdParcelas > 0 && valorParcela > 0) {
+                    for (let mes = 1; mes <= qtdParcelas; mes++) {
+                        let valorCorrigido = valorParcela;
+                        let mesCalculo = dataInicio;
+                        
+                        for (let m = 1; m <= mes; m++) {
+                            const indice = getIndiceCorrecao(mesCalculo, tipoImovel, dataEntrega, dataChaves);
+                            valorCorrigido *= (1 + indice / 100);
+                            mesCalculo = getNextMonth(mesCalculo);
+                        }
+                        
+                        // Aplicar arredondamento
+                        valorCorrigido = aplicarArredondamento(valorCorrigido, 'parcela', configArredondamento);
+
+                        parcelas.push({
+                            mes: mes,
+                            mesAno: mesAtual,
+                            tipo: 'parcela',
+                            valorOriginal: valorParcela,
+                            valorCorrigido: valorCorrigido
+                        });
+
+                    mesAtual = getNextMonth(mesAtual);
+                    }
+                } // Fim do if de parcelas
+
+                // Processar reforços individuais com suas datas específicas
+                reforcosIndividuais.forEach(reforcoConfig => {
+                    let valorReforcoCorrigido = reforcoConfig.valor;
+                    let mesCalculo = dataInicio;
+                    
+                    // Calcular correção até a data do reforço
+                    while (compararDatas(mesCalculo, reforcoConfig.data) < 0) {
+                        const indice = getIndiceCorrecao(mesCalculo, tipoImovel, dataEntrega, dataChaves);
+                        valorReforcoCorrigido *= (1 + indice / 100);
+                        mesCalculo = getNextMonth(mesCalculo);
+                    }
+                    
+                    // Aplicar arredondamento
+                    valorReforcoCorrigido = aplicarArredondamento(valorReforcoCorrigido, 'reforco', configArredondamento);
+
+                    reforcos.push({
+                        numero: reforcoConfig.numero,
+                        mesAno: reforcoConfig.data,
+                        tipo: 'reforco',
+                        valorOriginal: reforcoConfig.valor,
+                        valorCorrigido: valorReforcoCorrigido
+                    });
+                });
+
+                let chavesCorrigido = chaves;
+                if (dataChaves) {
+                    let mesCalculo = dataInicio;
+                    while (compararDatas(mesCalculo, dataChaves) < 0) {
+                        const indice = getIndiceCorrecao(mesCalculo, tipoImovel, dataEntrega, dataChaves);
+                        chavesCorrigido *= (1 + indice / 100);
+                        mesCalculo = getNextMonth(mesCalculo);
+                    }
+                    // Aplicar arredondamento
+                    chavesCorrigido = aplicarArredondamento(chavesCorrigido, 'chaves', configArredondamento);
+                }
+                
+                // Aplicar arredondamento na entrada se configurado
+                const entradaFinal = aplicarArredondamento(entrada, 'entrada', configArredondamento);
+
+                const totalParcelasCorrigido = parcelas.reduce((sum, p) => sum + p.valorCorrigido, 0);
+                const totalReforcosCorrigido = reforcos.reduce((sum, r) => sum + r.valorCorrigido, 0);
+                const totalAtualizado = entradaFinal + totalParcelasCorrigido + totalReforcosCorrigido + chavesCorrigido;
+
+                // Exibir resultados
+                let html = `
+                    <div class="result-card">
+                        <div class="result-label">Primeira Parcela</div>
+                        <div class="result-value">R$ ${formatarMoeda(parcelas[0].valorCorrigido)}</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Última Parcela</div>
+                        <div class="result-value">R$ ${formatarMoeda(parcelas[parcelas.length - 1].valorCorrigido)}</div>
+                    </div>
+                `;
+
+                if (reforcos.length > 0) {
+                    html += `
+                        <div class="result-card">
+                            <div class="result-label">Primeiro Reforço</div>
+                            <div class="result-value">R$ ${formatarMoeda(reforcos[0].valorCorrigido)}</div>
+                        </div>
+                        <div class="result-card">
+                            <div class="result-label">Último Reforço</div>
+                            <div class="result-value">R$ ${formatarMoeda(reforcos[reforcos.length - 1].valorCorrigido)}</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="result-card">
+                        <div class="result-label">Chaves (${dataChaves || 'Final'})</div>
+                        <div class="result-value">R$ ${formatarMoeda(chavesCorrigido)}</div>
+                    </div>
+                    <div class="result-card highlight">
+                        <div class="result-label">Valor Total Atualizado</div>
+                        <div class="result-value">R$ ${formatarMoeda(totalAtualizado)}</div>
+                    </div>
+                `;
+
+                document.getElementById('resultsGridProjection').innerHTML = html;
+                document.getElementById('resultsProjection').classList.add('active');
+
+                // Gerar resumo para impressão
+                const modoTexto = modoReais ? 'Valores em R$' : 'Valores em %';
+                const tipoImovelTexto = tipoImovel === 'obras' ? 'Em Obras' : 'Imóvel Pronto';
+                
+                const totalReforcosOriginal = reforcosIndividuais.reduce((sum, r) => sum + r.valor, 0);
+                
+                const printSummaryHTML = `
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Modo de Entrada:</span>
+                        <span class="print-summary-value">${modoTexto}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Tipo de Imóvel:</span>
+                        <span class="print-summary-value">${tipoImovelTexto}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Data de Início:</span>
+                        <span class="print-summary-value">${dataInicio}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Prazo:</span>
+                        <span class="print-summary-value">${qtdParcelas} meses</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Entrada:</span>
+                        <span class="print-summary-value">R$ ${formatarMoeda(entrada)}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Parcelas (${qtdParcelas}x):</span>
+                        <span class="print-summary-value">R$ ${formatarMoeda(valorParcela)}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Reforços (${reforcosIndividuais.length}):</span>
+                        <span class="print-summary-value">R$ ${formatarMoeda(totalReforcosOriginal)}</span>
+                    </div>
+                    <div class="print-summary-item">
+                        <span class="print-summary-label">Chaves:</span>
+                        <span class="print-summary-value">R$ ${formatarMoeda(chaves)}</span>
+                    </div>
+                    <div class="print-summary-item" style="border-top: 2px solid #FF6B00; margin-top: 0.5rem; padding-top: 0.5rem;">
+                        <span class="print-summary-label" style="font-size: 1.1rem;">Valor Total Proposta:</span>
+                        <span class="print-summary-value" style="font-size: 1.3rem;">R$ ${formatarMoeda(entrada + (valorParcela * qtdParcelas) + totalReforcosOriginal + chaves)}</span>
+                    </div>
+                    <div class="print-summary-item" style="border-top: 2px solid #FF6B00;">
+                        <span class="print-summary-label" style="font-size: 1.1rem;">Valor Total Atualizado:</span>
+                        <span class="print-summary-value" style="font-size: 1.3rem;">R$ ${formatarMoeda(totalAtualizado)}</span>
+                    </div>
+                `;
+                
+                document.getElementById('printSummaryContent').innerHTML = printSummaryHTML;
+
+                // Salvar unidade calculada
+                const simulationName = document.getElementById('simulationName')?.value.trim() || '';
+                const unidadeNome = simulationName || `Unidade ${unidadesCalculadas.length + 1} - ${new Date().toLocaleString('pt-BR', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}`;
+                
+                // Criar lista combinada de todos os itens
+                let todosItens = [];
+                
+                // Adicionar entrada
+                todosItens.push({
+                    ordem: 0,
+                    mes: 0,
+                    mesAno: dataInicio,
+                    tipo: 'entrada',
+                    valorOriginal: entrada,
+                    valorCorrigido: entradaFinal
+                });
+                
+                // Adicionar parcelas
+                parcelas.forEach(p => {
+                    todosItens.push({
+                        ordem: p.mes,
+                        mes: p.mes,
+                        mesAno: p.mesAno,
+                        tipo: 'parcela',
+                        valorOriginal: p.valorOriginal,
+                        valorCorrigido: p.valorCorrigido
+                    });
+                });
+                
+                // Adicionar reforços (já com suas datas específicas)
+                reforcos.forEach(r => {
+                    // Encontrar o mês correspondente à data do reforço
+                    const parcelaNaData = parcelas.find(p => p.mesAno === r.mesAno);
+                    const mesOrdem = parcelaNaData ? parcelaNaData.mes : 999; // Se não encontrar parcela, põe no final
+                    
+                    todosItens.push({
+                        ordem: mesOrdem,
+                        mes: mesOrdem,
+                        mesAno: r.mesAno,
+                        tipo: 'reforco',
+                        numero: r.numero,
+                        valorOriginal: r.valorOriginal,
+                        valorCorrigido: r.valorCorrigido
+                    });
+                });
+                
+                // Adicionar chaves (na posição correta por data)
+                if (chaves > 0 && dataChaves) {
+                    const parcelaNaDataChaves = parcelas.find(p => p.mesAno === dataChaves);
+                    const mesOrdem = parcelaNaDataChaves ? parcelaNaDataChaves.mes : parcelas.length + 1;
+                    
+                    todosItens.push({
+                        ordem: mesOrdem,
+                        mes: mesOrdem,
+                        mesAno: dataChaves,
+                        tipo: 'chaves',
+                        valorOriginal: chaves,
+                        valorCorrigido: chavesCorrigido
+                    });
+                }
+                
+                // Ordenar todos os itens por ordem e tipo
+                todosItens.sort((a, b) => {
+                    if (a.ordem !== b.ordem) return a.ordem - b.ordem;
+                    const tipoOrdem = { entrada: 0, parcela: 1, reforco: 2, chaves: 3 };
+                    return tipoOrdem[a.tipo] - tipoOrdem[b.tipo];
+                });
+
+                const unidade = {
+                    nome: unidadeNome,
+                    itens: todosItens,
+                    totalOriginal: entrada + (valorParcela * qtdParcelas) + totalReforcosOriginal + chaves,
+                    totalCorrigido: totalAtualizado
+                };
+
+                unidadesCalculadas.push(unidade);
+                autoSave(); // Auto-salvar
+                atualizarSelectUnidades();
+
+                window.dadosCalculoAtual = unidade;
+
+                document.getElementById('spinner').classList.remove('active');
+                const calcBtn = document.getElementById('calcularProjecaoBtn');
+                if (calcBtn) calcBtn.classList.remove('loading');
+                document.getElementById('resultsProjection').scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+            } catch (error) {
+                console.error('Erro no cálculo:', error);
+                alert('Erro ao calcular: ' + error.message);
+                document.getElementById('spinner').classList.remove('active');
+                const calcBtn = document.getElementById('calcularProjecaoBtn');
+                if (calcBtn) calcBtn.classList.remove('loading');
+            }
+        }
+
+        // Atualizar select de unidades
+        function atualizarSelectUnidades() {
+            const select = document.getElementById('unidadeSelect');
+            select.innerHTML = '';
+            
+            if (unidadesCalculadas.length === 0) {
+                select.innerHTML = '<option value="" disabled>Nenhuma unidade calculada ainda</option>';
+                return;
+            }
+
+            unidadesCalculadas.forEach((unidade, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = unidade.nome;
+                select.appendChild(option);
+            });
+        }
+
+        // Carregar unidade para negociação
+        function carregarUnidadeNegociacao() {
+            const select = document.getElementById('unidadeSelect');
+            const selectedOptions = Array.from(select.selectedOptions);
+            
+            if (selectedOptions.length === 0) return;
+
+            const unidadesSelecionadas = selectedOptions.map(opt => unidadesCalculadas[opt.value]);
+            
+            // Combinar todas as unidades selecionadas
+            let todosItens = [];
+            
+            unidadesSelecionadas.forEach(unidade => {
+                todosItens.push(...unidade.itens);
+            });
+
+            // Ordenar por ordem e tipo
+            todosItens.sort((a, b) => {
+                if (a.ordem !== b.ordem) return a.ordem - b.ordem;
+                const tipoOrdem = { entrada: 0, parcela: 1, reforco: 2, chaves: 3 };
+                return tipoOrdem[a.tipo] - tipoOrdem[b.tipo];
+            });
+
+            // Renderizar tabela
+            const tbody = document.getElementById('negotiationTableBody');
+            tbody.innerHTML = '';
+
+            todosItens.forEach((item, index) => {
+                const desconto = item.valorCorrigido - item.valorOriginal;
+                const tr = document.createElement('tr');
+                
+                let tipoLabel = '';
+                let tipoBadge = '';
+                if (item.tipo === 'entrada') {
+                    tipoLabel = 'Entrada';
+                    tipoBadge = 'parcela';
+                } else if (item.tipo === 'parcela') {
+                    tipoLabel = 'Parcela';
+                    tipoBadge = 'parcela';
+                } else if (item.tipo === 'reforco') {
+                    tipoLabel = `Reforço ${item.numero}`;
+                    tipoBadge = 'reforco';
+                } else if (item.tipo === 'chaves') {
+                    tipoLabel = 'Chaves';
+                    tipoBadge = 'chaves';
+                }
+
+                tr.innerHTML = `
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="item-checkbox" data-index="${index}" 
+                               data-original="${item.valorOriginal}" 
+                               data-corrigido="${item.valorCorrigido}">
+                    </td>
+                    <td>${item.mes === 0 ? '0' : item.mes}</td>
+                    <td>${item.mesAno}</td>
+                    <td><span class="type-badge ${tipoBadge}">${tipoLabel}</span></td>
+                    <td>R$ ${formatarMoeda(item.valorOriginal)}</td>
+                    <td>R$ ${formatarMoeda(item.valorCorrigido)}</td>
+                    <td style="color: var(--discount); font-weight: 700;">R$ ${formatarMoeda(desconto)}</td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            // Add event listeners aos checkboxes
+            document.querySelectorAll('.item-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    this.closest('tr').classList.toggle('selected', this.checked);
+                    calcularDescontoTotal();
+                });
+            });
+
+            document.getElementById('negotiationTableSection').style.display = 'block';
+            calcularDescontoTotal();
+        }
+
+        // Calcular desconto total
+        function calcularDescontoTotal() {
+            let totalOriginal = 0;
+            let totalCorrigido = 0;
+
+            document.querySelectorAll('.item-checkbox:checked').forEach(cb => {
+                totalOriginal += parseFloat(cb.dataset.original);
+                totalCorrigido += parseFloat(cb.dataset.corrigido);
+            });
+
+            const desconto = totalCorrigido - totalOriginal;
+
+            document.getElementById('valorAtualSum').textContent = `R$ ${formatarMoeda(totalOriginal)}`;
+            document.getElementById('valorProjetadoSum').textContent = `R$ ${formatarMoeda(totalCorrigido)}`;
+            document.getElementById('descontoSum').textContent = `R$ ${formatarMoeda(desconto)}`;
+        }
+
+        // Mostrar detalhes
+        function mostrarDetalhesProjecao() {
+            if (!window.dadosCalculoAtual) return;
+
+            const unidade = window.dadosCalculoAtual;
+            let html = '<h3 style="margin-bottom: 1rem; color: var(--gt-orange);">Extrato Mês a Mês</h3>';
+            html += '<table class="negotiation-table"><thead><tr><th>Mês</th><th>Data</th><th>Tipo</th><th>Valor Original</th><th>Valor Corrigido</th></tr></thead><tbody>';
+
+            unidade.itens.forEach(item => {
+                let tipoLabel = '';
+                let classe = '';
+                
+                if (item.tipo === 'entrada') {
+                    tipoLabel = 'Entrada';
+                    classe = 'highlight';
+                } else if (item.tipo === 'parcela') {
+                    tipoLabel = 'Parcela';
+                } else if (item.tipo === 'reforco') {
+                    tipoLabel = `Reforço ${item.numero}`;
+                    classe = 'highlight';
+                } else if (item.tipo === 'chaves') {
+                    tipoLabel = 'Chaves';
+                    classe = 'highlight';
+                }
+                
+                html += `<tr class="${classe}"><td>${item.mes === 0 ? '0' : item.mes}</td><td>${item.mesAno}</td><td>${tipoLabel}</td><td>R$ ${formatarMoeda(item.valorOriginal)}</td><td>R$ ${formatarMoeda(item.valorCorrigido)}</td></tr>`;
+            });
+
+            html += '</tbody></table>';
+
+            document.getElementById('reportContentProjection').innerHTML = html;
+            document.getElementById('detailedReportProjection').style.display = 'block';
+            document.getElementById('detailedReportProjection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Limpar
+        function imprimirExtrato() {
+            // Adicionar data e hora à impressão
+            const agora = new Date();
+            const dataHora = agora.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.querySelector('.header').setAttribute('data-print-date', dataHora);
+            
+            window.print();
+        }
+
+        // Funções do Comparador de Cenários
+        let cenariosSecionados = [];
+
+        function carregarComparador() {
+            const scenarioCards = document.getElementById('scenarioCards');
+            const noScenariosMessage = document.getElementById('noScenariosMessage');
+            const scenarioSelectionArea = document.getElementById('scenarioSelectionArea');
+            
+            if (unidadesCalculadas.length === 0) {
+                noScenariosMessage.style.display = 'block';
+                scenarioSelectionArea.style.display = 'none';
+                return;
+            }
+            
+            noScenariosMessage.style.display = 'none';
+            scenarioSelectionArea.style.display = 'block';
+            cenariosSecionados = [];
+            
+            let html = '';
+            unidadesCalculadas.forEach((unidade, index) => {
+                const entrada = unidade.itens.find(i => i.tipo === 'entrada');
+                const parcelas = unidade.itens.filter(i => i.tipo === 'parcela');
+                const prazo = parcelas.length;
+                
+                html += `
+                    <div class="scenario-card" data-index="${index}">
+                        <div class="scenario-header">
+                            <div class="scenario-name">${unidade.nome}</div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="scenario-action-btn" onclick="event.stopPropagation(); editarUnidade(${index})" title="Editar" style="background: transparent; border: none; color: var(--gt-orange); cursor: pointer; font-size: 1.2rem; padding: 0.25rem;">
+                                    ✏️
+                                </button>
+                                <button class="scenario-action-btn" onclick="event.stopPropagation(); duplicarUnidade(${index})" title="Duplicar" style="background: transparent; border: none; color: var(--gt-white); cursor: pointer; font-size: 1.2rem; padding: 0.25rem;">
+                                    📋
+                                </button>
+                                <button class="scenario-action-btn" onclick="event.stopPropagation(); excluirUnidade(${index})" title="Excluir" style="background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 1.2rem; padding: 0.25rem;">
+                                    🗑️
+                                </button>
+                            </div>
+                        </div>
+                        <div class="scenario-stats" onclick="toggleScenario(${index})" style="cursor: pointer;">
+                            <div class="scenario-stat">
+                                <span class="scenario-stat-label">Entrada:</span>
+                                <span class="scenario-stat-value">R$ ${formatarMoeda(entrada?.valorOriginal || 0)}</span>
+                            </div>
+                            <div class="scenario-stat">
+                                <span class="scenario-stat-label">Prazo:</span>
+                                <span class="scenario-stat-value">${prazo}x</span>
+                            </div>
+                            <div class="scenario-stat">
+                                <span class="scenario-stat-label">Total:</span>
+                                <span class="scenario-stat-value">R$ ${formatarMoeda(unidade.totalCorrigido)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            scenarioCards.innerHTML = html;
+            document.getElementById('comparisonResults').style.display = 'none';
+        }
+
+        function toggleScenario(index) {
+            const card = document.querySelector(`.scenario-card[data-index="${index}"]`);
+            const compareBtn = document.getElementById('compareBtn');
+            
+            if (cenariosSecionados.includes(index)) {
+                cenariosSecionados = cenariosSecionados.filter(i => i !== index);
+                card.classList.remove('selected');
+            } else {
+                if (cenariosSecionados.length < 3) {
+                    cenariosSecionados.push(index);
+                    card.classList.add('selected');
+                } else {
+                    alert('Você pode comparar no máximo 3 cenários.');
+                    return;
+                }
+            }
+            
+            compareBtn.style.display = cenariosSecionados.length >= 2 ? 'block' : 'none';
+        }
+
+        function editarUnidade(index) {
+            if (confirm('Editar unidade ainda não implementado. Por enquanto, você pode duplicar e recalcular com novos valores.')) {
+                duplicarUnidade(index);
+            }
+        }
+
+        function duplicarUnidade(index) {
+            const unidade = unidadesCalculadas[index];
+            const novoNome = prompt('Nome da nova simulação:', unidade.nome + ' (Cópia)');
+            
+            if (novoNome) {
+                const copia = JSON.parse(JSON.stringify(unidade));
+                copia.nome = novoNome;
+                unidadesCalculadas.push(copia);
+                autoSave();
+                carregarComparador();
+                alert('✅ Unidade duplicada com sucesso!');
+            }
+        }
+
+        function excluirUnidade(index) {
+            const unidade = unidadesCalculadas[index];
+            if (confirm(`Tem certeza que deseja excluir "${unidade.nome}"?`)) {
+                unidadesCalculadas.splice(index, 1);
+                autoSave();
+                atualizarSelectUnidades();
+                carregarComparador();
+                alert('🗑️ Unidade excluída!');
+            }
+        }
+
+        // ============================================================================
+        // PROPOSTA PADRÃO - "E SE...?" FUNCTIONS
+        // ============================================================================
+        
+        let quickProposalBaseValue = 0;
+        let quickScenarios = [];
+        let quickScenarioCounter = 0;
+
+        function gerarPropostaPadrao() {
+            const valorInput = document.getElementById('quickProposalValue').value;
+            const valor = parseFloat(valorInput.replace(/\./g, '').replace(',', '.'));
+            
+            if (!valor || valor <= 0) {
+                alert('Por favor, digite um valor válido para a unidade.');
+                return;
+            }
+
+            quickProposalBaseValue = valor;
+            quickScenarios = [];
+            quickScenarioCounter = 0;
+
+            // Criar proposta padrão
+            const propostaPadrao = criarPropostaPadrao(valor);
+            quickScenarios.push(propostaPadrao);
+
+            // Mostrar passo 2
+            document.getElementById('quickProposalStep1').style.display = 'none';
+            document.getElementById('quickProposalStep2').style.display = 'block';
+
+            // Renderizar cenários
+            renderizarCenarios();
+        }
+
+        function criarPropostaPadrao(valorTotal) {
+            quickScenarioCounter++;
+            
+            const entrada = valorTotal * 0.50; // 50%
+            const parcelasPerc = 0.25; // 25%
+            const reforcosPerc = 0.25; // 25%
+            
+            const qtdParcelas = 36;
+            const qtdReforcos = 3;
+            
+            const valorParcelas = valorTotal * parcelasPerc;
+            const valorReforcos = valorTotal * reforcosPerc;
+            
+            const valorParcela = valorParcelas / qtdParcelas;
+            const valorReforco = valorReforcos / qtdReforcos;
+
+            return {
+                id: quickScenarioCounter,
+                nome: `Proposta Padrão`,
+                valorTotal: valorTotal,
+                entrada: entrada,
+                entradaPerc: 50,
+                qtdParcelas: qtdParcelas,
+                parcelasPerc: parcelasPerc * 100,
+                valorParcela: valorParcela,
+                qtdReforcos: qtdReforcos,
+                reforcosPerc: reforcosPerc * 100,
+                valorReforco: valorReforco,
+                indice: 'IPCA + 0,89%',
+                totalOriginal: valorTotal,
+                editing: false
+            };
+        }
+
+        function adicionarCenario() {
+            if (quickScenarios.length >= 3) {
+                alert('Máximo de 3 cenários para comparação.');
+                return;
+            }
+
+            quickScenarioCounter++;
+            
+            const novoce = {
+                id: quickScenarioCounter,
+                nome: `Cenário ${quickScenarioCounter}`,
+                valorTotal: quickProposalBaseValue,
+                entrada: quickProposalBaseValue * 0.30,
+                entradaPerc: 30,
+                qtdParcelas: 36,
+                parcelasPerc: 50,
+                valorParcela: (quickProposalBaseValue * 0.50) / 36,
+                qtdReforcos: 2,
+                reforcosPerc: 20,
+                valorReforco: (quickProposalBaseValue * 0.20) / 2,
+                indice: 'IPCA + 0,89%',
+                totalOriginal: quickProposalBaseValue,
+                editing: true
+            };
+
+            quickScenarios.push(novoce);
+            renderizarCenarios();
+        }
+
+        function renderizarCenarios() {
+            const grid = document.getElementById('quickScenariosGrid');
+            grid.innerHTML = '';
+
+            quickScenarios.forEach((cenario, index) => {
+                const card = criarCardCenario(cenario, index);
+                grid.appendChild(card);
+            });
+
+            // Mostrar botão comparar se houver 2+ cenários
+            const compareArea = document.getElementById('compareButtonArea');
+            if (quickScenarios.length >= 2) {
+                compareArea.style.display = 'block';
+            } else {
+                compareArea.style.display = 'none';
+            }
+
+            // Esconder resultado de comparação
+            document.getElementById('quickComparisonResult').style.display = 'none';
+        }
+
+        function criarCardCenario(cenario, index) {
+            const div = document.createElement('div');
+            div.className = 'quick-scenario-card' + (cenario.editing ? ' editing' : '');
+            div.id = `quickScenario${cenario.id}`;
+
+            const totalCalculado = cenario.entrada + (cenario.valorParcela * cenario.qtdParcelas) + (cenario.valorReforco * cenario.qtdReforcos);
+
+            div.innerHTML = `
+                <div class="quick-scenario-header">
+                    <div class="quick-scenario-title">${cenario.nome}</div>
+                    <div class="quick-scenario-actions">
+                        <button class="quick-scenario-btn" onclick="editarCenario(${index})" title="Editar">
+                            ✏️
+                        </button>
+                        ${quickScenarios.length > 1 ? `
+                        <button class="quick-scenario-btn" onclick="removerCenario(${index})" title="Remover">
+                            🗑️
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <div class="quick-scenario-field">
+                    <label>Entrada (%)</label>
+                    <input type="number" 
+                           value="${cenario.entradaPerc}" 
+                           min="0" 
+                           max="100" 
+                           step="5"
+                           onchange="atualizarCampo(${index}, 'entradaPerc', this.value)"
+                           ${!cenario.editing ? 'readonly' : ''}>
+                </div>
+
+                <div class="quick-scenario-field">
+                    <label>Parcelas (quantidade)</label>
+                    <input type="number" 
+                           value="${cenario.qtdParcelas}" 
+                           min="1" 
+                           max="180"
+                           onchange="atualizarCampo(${index}, 'qtdParcelas', this.value)"
+                           ${!cenario.editing ? 'readonly' : ''}>
+                </div>
+
+                <div class="quick-scenario-field">
+                    <label>Parcelas (% total)</label>
+                    <input type="number" 
+                           value="${cenario.parcelasPerc}" 
+                           min="0" 
+                           max="100" 
+                           step="5"
+                           onchange="atualizarCampo(${index}, 'parcelasPerc', this.value)"
+                           ${!cenario.editing ? 'readonly' : ''}>
+                </div>
+
+                <div class="quick-scenario-field">
+                    <label>Reforços (quantidade)</label>
+                    <input type="number" 
+                           value="${cenario.qtdReforcos}" 
+                           min="0" 
+                           max="10"
+                           onchange="atualizarCampo(${index}, 'qtdReforcos', this.value)"
+                           ${!cenario.editing ? 'readonly' : ''}>
+                </div>
+
+                <div class="quick-scenario-field">
+                    <label>Reforços (% total)</label>
+                    <input type="number" 
+                           value="${cenario.reforcosPerc}" 
+                           min="0" 
+                           max="100" 
+                           step="5"
+                           onchange="atualizarCampo(${index}, 'reforcosPerc', this.value)"
+                           ${!cenario.editing ? 'readonly' : ''}>
+                </div>
+
+                <div class="quick-scenario-summary">
+                    <div class="quick-scenario-summary-item">
+                        <span>Entrada:</span>
+                        <strong>R$ ${formatarMoeda(cenario.entrada)}</strong>
+                    </div>
+                    <div class="quick-scenario-summary-item">
+                        <span>Parcela:</span>
+                        <strong>${cenario.qtdParcelas}x de R$ ${formatarMoeda(cenario.valorParcela)}</strong>
+                    </div>
+                    ${cenario.qtdReforcos > 0 ? `
+                    <div class="quick-scenario-summary-item">
+                        <span>Reforço:</span>
+                        <strong>${cenario.qtdReforcos}x de R$ ${formatarMoeda(cenario.valorReforco)}</strong>
+                    </div>
+                    ` : ''}
+                    <div class="quick-scenario-summary-item total">
+                        <span>Total Original:</span>
+                        <strong>R$ ${formatarMoeda(totalCalculado)}</strong>
+                    </div>
+                </div>
+            `;
+
+            return div;
+        }
+
+        function editarCenario(index) {
+            quickScenarios[index].editing = !quickScenarios[index].editing;
+            renderizarCenarios();
+        }
+
+        function removerCenario(index) {
+            if (confirm(`Remover ${quickScenarios[index].nome}?`)) {
+                quickScenarios.splice(index, 1);
+                renderizarCenarios();
+            }
+        }
+
+        function atualizarCampo(index, campo, valor) {
+            const cenario = quickScenarios[index];
+            const valorNum = parseFloat(valor);
+
+            if (campo === 'entradaPerc') {
+                cenario.entradaPerc = valorNum;
+                cenario.entrada = cenario.valorTotal * (valorNum / 100);
+            } else if (campo === 'qtdParcelas') {
+                cenario.qtdParcelas = valorNum;
+                cenario.valorParcela = (cenario.valorTotal * (cenario.parcelasPerc / 100)) / valorNum;
+            } else if (campo === 'parcelasPerc') {
+                cenario.parcelasPerc = valorNum;
+                cenario.valorParcela = (cenario.valorTotal * (valorNum / 100)) / cenario.qtdParcelas;
+            } else if (campo === 'qtdReforcos') {
+                cenario.qtdReforcos = valorNum;
+                if (valorNum > 0) {
+                    cenario.valorReforco = (cenario.valorTotal * (cenario.reforcosPerc / 100)) / valorNum;
+                } else {
+                    cenario.valorReforco = 0;
+                }
+            } else if (campo === 'reforcosPerc') {
+                cenario.reforcosPerc = valorNum;
+                if (cenario.qtdReforcos > 0) {
+                    cenario.valorReforco = (cenario.valorTotal * (valorNum / 100)) / cenario.qtdReforcos;
+                }
+            }
+
+            renderizarCenarios();
+        }
+
+        function compararCenariosRapidos() {
+            if (quickScenarios.length < 2) {
+                alert('Adicione pelo menos 2 cenários para comparar.');
+                return;
+            }
+
+            // Calcular totais corrigidos (simplificado - sem correção real nesta versão rápida)
+            quickScenarios.forEach(c => {
+                c.totalCorrigido = c.entrada + (c.valorParcela * c.qtdParcelas) + (c.valorReforco * c.qtdReforcos);
+            });
+
+            // Encontrar melhor (menor total)
+            let melhorIndex = 0;
+            let menorTotal = quickScenarios[0].totalCorrigido;
+            quickScenarios.forEach((c, i) => {
+                if (c.totalCorrigido < menorTotal) {
+                    menorTotal = c.totalCorrigido;
+                    melhorIndex = i;
+                }
+            });
+
+            // Gerar tabela
+            let tableHTML = `
+                <thead>
+                    <tr>
+                        <th style="min-width: 150px;">Critério</th>
+                        ${quickScenarios.map((c, i) => `
+                            <th style="min-width: 130px;">${c.nome}${i === melhorIndex ? ' ⭐' : ''}</th>
+                        `).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            // Entrada
+            tableHTML += `<tr><td><strong>Entrada</strong></td>`;
+            quickScenarios.forEach(c => {
+                tableHTML += `<td>R$ ${formatarMoeda(c.entrada)}<br><small>(${c.entradaPerc}%)</small></td>`;
+            });
+            tableHTML += `</tr>`;
+
+            // Parcelas
+            tableHTML += `<tr><td><strong>Parcelas</strong></td>`;
+            quickScenarios.forEach(c => {
+                tableHTML += `<td>${c.qtdParcelas}x de R$ ${formatarMoeda(c.valorParcela)}</td>`;
+            });
+            tableHTML += `</tr>`;
+
+            // Reforços
+            const temReforcos = quickScenarios.some(c => c.qtdReforcos > 0);
+            if (temReforcos) {
+                tableHTML += `<tr><td><strong>Reforços</strong></td>`;
+                quickScenarios.forEach(c => {
+                    if (c.qtdReforcos > 0) {
+                        tableHTML += `<td>${c.qtdReforcos}x de R$ ${formatarMoeda(c.valorReforco)}</td>`;
+                    } else {
+                        tableHTML += `<td>---</td>`;
+                    }
+                });
+                tableHTML += `</tr>`;
+            }
+
+            // Total
+            tableHTML += `<tr style="background: rgba(255,107,0,0.1);"><td><strong>Total</strong></td>`;
+            quickScenarios.forEach((c, i) => {
+                const classe = i === melhorIndex ? 'best-value' : '';
+                tableHTML += `<td class="${classe}"><strong>R$ ${formatarMoeda(c.totalCorrigido)}</strong></td>`;
+            });
+            tableHTML += `</tr>`;
+
+            // Diferença
+            tableHTML += `<tr><td><strong>Diferença vs Melhor</strong></td>`;
+            quickScenarios.forEach((c, i) => {
+                const diff = c.totalCorrigido - menorTotal;
+                if (i === melhorIndex) {
+                    tableHTML += `<td class="best-value"><strong>---</strong></td>`;
+                } else {
+                    tableHTML += `<td class="worst-value"><strong>+R$ ${formatarMoeda(diff)}</strong></td>`;
+                }
+            });
+            tableHTML += `</tr>`;
+
+            tableHTML += `</tbody>`;
+
+            document.getElementById('quickComparisonTable').innerHTML = tableHTML;
+
+            // Recomendação
+            const economiaMax = Math.max(...quickScenarios.map(c => c.totalCorrigido)) - menorTotal;
+            const recomendacao = `
+                <strong>${quickScenarios[melhorIndex].nome}</strong> é a melhor opção com um total de 
+                <strong>R$ ${formatarMoeda(menorTotal)}</strong>. 
+                ${quickScenarios.length > 2 ? `Economiza <strong>R$ ${formatarMoeda(economiaMax)}</strong> comparado ao cenário mais caro (${((economiaMax / Math.max(...quickScenarios.map(c => c.totalCorrigido))) * 100).toFixed(1)}%).` : ''}
+            `;
+
+            document.getElementById('quickComparisonRecommendation').innerHTML = recomendacao;
+            document.getElementById('quickComparisonResult').style.display = 'block';
+
+            // Scroll suave
+            document.getElementById('quickComparisonResult').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function voltarInicio() {
+            if (confirm('Deseja voltar e criar uma nova proposta? Os cenários atuais serão perdidos.')) {
+                document.getElementById('quickProposalStep1').style.display = 'block';
+                document.getElementById('quickProposalStep2').style.display = 'none';
+                document.getElementById('quickProposalValue').value = '';
+                quickScenarios = [];
+                quickScenarioCounter = 0;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const compareBtn = document.getElementById('compareBtn');
+            if (compareBtn) {
+                compareBtn.addEventListener('click', compararCenarios);
+            }
+            
+            const newComparisonBtn = document.getElementById('newComparisonBtn');
+            if (newComparisonBtn) {
+                newComparisonBtn.addEventListener('click', function() {
+                    document.getElementById('comparisonResults').style.display = 'none';
+                    carregarComparador();
+                });
+            }
+            
+            const exportComparisonBtn = document.getElementById('exportComparisonBtn');
+            if (exportComparisonBtn) {
+                exportComparisonBtn.addEventListener('click', imprimirComparacao);
+            }
+        });
+
+        function imprimirComparacao() {
+            // Adicionar data e hora
+            const agora = new Date();
+            const dataHora = agora.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.querySelector('.header').setAttribute('data-print-date', dataHora);
+            
+            // Marcar que estamos imprimindo comparação
+            document.body.classList.add('printing-comparison');
+            
+            window.print();
+            
+            // Remover marca após impressão
+            setTimeout(() => {
+                document.body.classList.remove('printing-comparison');
+            }, 1000);
+        }
+
+        function compararCenarios() {
+            if (cenariosSecionados.length < 2) {
+                alert('Selecione pelo menos 2 cenários para comparar.');
+                return;
+            }
+            
+            const cenarios = cenariosSecionados.map(i => unidadesCalculadas[i]);
+            
+            // Encontrar melhor cenário (menor total)
+            let melhorIndex = 0;
+            let menorTotal = cenarios[0].totalCorrigido;
+            cenarios.forEach((c, i) => {
+                if (c.totalCorrigido < menorTotal) {
+                    menorTotal = c.totalCorrigido;
+                    melhorIndex = i;
+                }
+            });
+            
+            // Gerar tabela de comparação COMPLETA
+            let tableHTML = `
+                <thead>
+                    <tr>
+                        <th style="min-width: 180px;">Critério</th>
+                        ${cenarios.map((c, i) => `
+                            <th style="min-width: 150px;">${c.nome}${i === melhorIndex ? ' ⭐' : ''}</th>
+                        `).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            // Entrada
+            const entradas = cenarios.map(c => c.itens.find(i => i.tipo === 'entrada')?.valorCorrigido || 0);
+            tableHTML += `<tr><td><strong>Entrada</strong></td>`;
+            entradas.forEach((v, i) => {
+                tableHTML += `<td>R$ ${formatarMoeda(v)}</td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Prazo
+            const prazos = cenarios.map(c => c.itens.filter(i => i.tipo === 'parcela').length);
+            tableHTML += `<tr><td><strong>Prazo</strong></td>`;
+            prazos.forEach((v, i) => {
+                tableHTML += `<td>${v} meses</td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Parcela Inicial
+            const parcelasIniciais = cenarios.map(c => {
+                const parcelas = c.itens.filter(i => i.tipo === 'parcela').sort((a, b) => a.mes - b.mes);
+                return parcelas.length > 0 ? parcelas[0].valorCorrigido : 0;
+            });
+            tableHTML += `<tr><td><strong>Parcela Inicial</strong></td>`;
+            parcelasIniciais.forEach((v, i) => {
+                tableHTML += `<td>R$ ${formatarMoeda(v)}</td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Parcela Final
+            const parcelasFinais = cenarios.map(c => {
+                const parcelas = c.itens.filter(i => i.tipo === 'parcela').sort((a, b) => a.mes - b.mes);
+                return parcelas.length > 0 ? parcelas[parcelas.length - 1].valorCorrigido : 0;
+            });
+            tableHTML += `<tr><td><strong>Parcela Final</strong></td>`;
+            parcelasFinais.forEach((v, i) => {
+                tableHTML += `<td>R$ ${formatarMoeda(v)}</td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Reforços (se houver)
+            const temReforcos = cenarios.some(c => c.itens.some(i => i.tipo === 'reforco'));
+            if (temReforcos) {
+                // Quantidade de reforços
+                const qtdReforcos = cenarios.map(c => c.itens.filter(i => i.tipo === 'reforco').length);
+                tableHTML += `<tr><td><strong>Quantidade Reforços</strong></td>`;
+                qtdReforcos.forEach((v, i) => {
+                    tableHTML += `<td>${v || 'Nenhum'}</td>`;
+                });
+                tableHTML += `</tr>`;
+                
+                // Primeiro Reforço
+                const reforcosIniciais = cenarios.map(c => {
+                    const reforcos = c.itens.filter(i => i.tipo === 'reforco');
+                    return reforcos.length > 0 ? reforcos[0].valorCorrigido : null;
+                });
+                tableHTML += `<tr><td><strong>Primeiro Reforço</strong></td>`;
+                reforcosIniciais.forEach((v, i) => {
+                    tableHTML += `<td>${v !== null ? 'R$ ' + formatarMoeda(v) : '---'}</td>`;
+                });
+                tableHTML += `</tr>`;
+                
+                // Último Reforço
+                const reforcosFinais = cenarios.map(c => {
+                    const reforcos = c.itens.filter(i => i.tipo === 'reforco');
+                    return reforcos.length > 0 ? reforcos[reforcos.length - 1].valorCorrigido : null;
+                });
+                tableHTML += `<tr><td><strong>Último Reforço</strong></td>`;
+                reforcosFinais.forEach((v, i) => {
+                    tableHTML += `<td>${v !== null ? 'R$ ' + formatarMoeda(v) : '---'}</td>`;
+                });
+                tableHTML += `</tr>`;
+            }
+            
+            // Chaves
+            const chavesValores = cenarios.map(c => {
+                const chaves = c.itens.find(i => i.tipo === 'chaves');
+                return chaves ? chaves.valorCorrigido : 0;
+            });
+            tableHTML += `<tr><td><strong>Chaves</strong></td>`;
+            chavesValores.forEach((v, i) => {
+                tableHTML += `<td>R$ ${formatarMoeda(v)}</td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Total Original
+            tableHTML += `<tr style="background: rgba(255,255,255,0.05);"><td><strong>Total Original</strong></td>`;
+            cenarios.forEach((c, i) => {
+                tableHTML += `<td><strong>R$ ${formatarMoeda(c.totalOriginal)}</strong></td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Total Corrigido
+            tableHTML += `<tr style="background: rgba(255,107,0,0.1);"><td><strong>Total Corrigido</strong></td>`;
+            cenarios.forEach((c, i) => {
+                const classe = i === melhorIndex ? 'best-value' : '';
+                tableHTML += `<td class="${classe}"><strong>R$ ${formatarMoeda(c.totalCorrigido)}</strong></td>`;
+            });
+            tableHTML += `</tr>`;
+            
+            // Diferença vs melhor
+            tableHTML += `<tr><td><strong>Diferença vs Melhor</strong></td>`;
+            cenarios.forEach((c, i) => {
+                const diff = c.totalCorrigido - menorTotal;
+                if (i === melhorIndex) {
+                    tableHTML += `<td class="best-value"><strong>---</strong></td>`;
+                } else {
+                    tableHTML += `<td class="worst-value"><strong>+R$ ${formatarMoeda(diff)}</strong></td>`;
+                }
+            });
+            tableHTML += `</tr>`;
+            
+            tableHTML += `</tbody>`;
+            
+            document.getElementById('comparisonTable').innerHTML = tableHTML;
+            
+            // Recomendação melhorada
+            const economiaMax = Math.max(...cenarios.map(c => c.totalCorrigido)) - menorTotal;
+            const recomendacao = `
+                <strong>${cenarios[melhorIndex].nome}</strong> é a melhor opção com um custo total de 
+                <strong>R$ ${formatarMoeda(menorTotal)}</strong>. 
+                ${cenarios.length > 2 ? `Comparado ao cenário mais caro, economiza <strong>R$ ${formatarMoeda(economiaMax)}</strong> (${((economiaMax / Math.max(...cenarios.map(c => c.totalCorrigido))) * 100).toFixed(1)}%).` : ''}
+            `;
+            
+            document.getElementById('comparisonRecommendation').innerHTML = recomendacao;
+            document.getElementById('comparisonResults').style.display = 'block';
+            document.getElementById('comparisonResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function limparProjecao() {
+            document.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                if (input.id !== 'dataInicio' && input.id !== 'qtdParcelas' && input.id !== 'qtdParcelasPercent' &&
+                    input.id !== 'ipcaManual' && input.id !== 'cubManual' && 
+                    input.id !== 'qtdReforcosManual' && input.id !== 'qtdReforcosPercent') {
+                    if (input.classList.contains('money-input')) {
+                        input.value = '0,00';
+                    } else if (input.type === 'number') {
+                        input.value = '';
+                    } else {
+                        input.value = '';
+                    }
+                }
+            });
+
+            // Limpar quantidade de reforços e containers
+            document.getElementById('qtdReforcosManual').value = '0';
+            document.getElementById('qtdReforcosPercent').value = '0';
+            document.getElementById('reforcosIndividuaisContainer').innerHTML = '';
+            document.getElementById('reforcosIndividuaisContainerPercent').innerHTML = '';
+
+            document.getElementById('resultsProjection').classList.remove('active');
+            document.getElementById('detailedReportProjection').style.display = 'none';
+            document.getElementById('percentValidation').style.display = 'none';
+            document.getElementById('totalNegociacaoReais').textContent = 'R$ 0,00';
+        }
+    </script>
+</body>
+</html>
