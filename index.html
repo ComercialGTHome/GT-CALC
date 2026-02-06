@@ -2567,10 +2567,10 @@
 
             if (modoReais) {
                 console.log('Modo R$ selecionado');
-                entrada = parseValorMoeda(document.getElementById('entradaValor').value);
-                valorParcela = parseValorMoeda(document.getElementById('parcelaValor').value);
+                entrada = parseValorMoeda(document.getElementById('entradaValor').value) || 0;
+                valorParcela = parseValorMoeda(document.getElementById('parcelaValor').value) || 0;
                 qtdParcelas = parseInt(document.getElementById('qtdParcelas').value) || 0;
-                chaves = parseValorMoeda(document.getElementById('chavesValor').value);
+                chaves = parseValorMoeda(document.getElementById('chavesValor').value) || 0;
                 
                 console.log('Valores:', {entrada, valorParcela, qtdParcelas, chaves});
                 
@@ -2582,11 +2582,14 @@
                     const valorInput = document.getElementById(`reforco${i}Valor`);
                     const dataInput = document.getElementById(`reforco${i}Data`);
                     if (valorInput && dataInput && dataInput.value) {
-                        reforcosIndividuais.push({
-                            numero: i,
-                            valor: parseValorMoeda(valorInput.value),
-                            data: dataInput.value
-                        });
+                        const valorReforco = parseValorMoeda(valorInput.value) || 0;
+                        if (valorReforco > 0) {
+                            reforcosIndividuais.push({
+                                numero: i,
+                                valor: valorReforco,
+                                data: dataInput.value
+                            });
+                        }
                     }
                 }
                 console.log('Reforços coletados:', reforcosIndividuais);
@@ -2608,10 +2611,10 @@
                 const percParcelas = parseFloat(document.getElementById('parcelasPercent').value) || 0;
                 const percChaves = parseFloat(document.getElementById('chavesPercent').value) || 0;
 
-                entrada = (valorTotal * percEntrada / 100);
-                const totalParcelas = (valorTotal * percParcelas / 100);
+                entrada = (valorTotal * percEntrada / 100) || 0;
+                const totalParcelas = (valorTotal * percParcelas / 100) || 0;
                 valorParcela = qtdParcelas > 0 ? totalParcelas / qtdParcelas : 0;
-                chaves = (valorTotal * percChaves / 100);
+                chaves = (valorTotal * percChaves / 100) || 0;
                 
                 // Coletar reforços individuais do modo percent
                 const qtdReforcos = parseInt(document.getElementById('qtdReforcosPercent').value) || 0;
@@ -2620,11 +2623,14 @@
                     const dataInput = document.getElementById(`reforcoPercent${i}Data`);
                     if (percentInput && dataInput && dataInput.value) {
                         const percReforco = parseFloat(percentInput.value) || 0;
-                        reforcosIndividuais.push({
-                            numero: i,
-                            valor: (valorTotal * percReforco / 100),
-                            data: dataInput.value
-                        });
+                        const valorReforco = (valorTotal * percReforco / 100) || 0;
+                        if (valorReforco > 0) {
+                            reforcosIndividuais.push({
+                                numero: i,
+                                valor: valorReforco,
+                                data: dataInput.value
+                            });
+                        }
                     }
                 }
             }
@@ -2718,8 +2724,9 @@
                     });
                 });
 
-                let chavesCorrigido = chaves;
-                if (dataChaves) {
+                // Calcular chaves corrigidas
+                let chavesCorrigido = chaves || 0;
+                if (chaves > 0 && dataChaves) {
                     let mesCalculo = dataInicio;
                     while (compararDatas(mesCalculo, dataChaves) < 0) {
                         const indice = getIndiceCorrecao(mesCalculo, tipoImovel, dataEntrega, dataChaves);
@@ -2731,14 +2738,29 @@
                 }
                 
                 // Aplicar arredondamento na entrada se configurado
-                const entradaFinal = aplicarArredondamento(entrada, 'entrada', configArredondamento);
+                const entradaFinal = entrada > 0 ? aplicarArredondamento(entrada, 'entrada', configArredondamento) : 0;
 
                 const totalParcelasCorrigido = parcelas.reduce((sum, p) => sum + p.valorCorrigido, 0);
                 const totalReforcosCorrigido = reforcos.reduce((sum, r) => sum + r.valorCorrigido, 0);
+                const totalReforcosOriginal = reforcos.reduce((sum, r) => sum + r.valorOriginal, 0);
                 const totalAtualizado = entradaFinal + totalParcelasCorrigido + totalReforcosCorrigido + chavesCorrigido;
 
                 // Exibir resultados
-                let html = `
+                let html = '';
+                
+                // Mostrar entrada se houver
+                if (entrada > 0) {
+                    html += `
+                        <div class="result-card">
+                            <div class="result-label">Entrada</div>
+                            <div class="result-value">R$ ${formatarMoeda(entradaFinal)}</div>
+                        </div>
+                    `;
+                }
+                
+                // Mostrar parcelas se houver
+                if (parcelas.length > 0) {
+                    html += `
                     <div class="result-card">
                         <div class="result-label">Primeira Parcela</div>
                         <div class="result-value">R$ ${formatarMoeda(parcelas[0].valorCorrigido)}</div>
@@ -2747,7 +2769,8 @@
                         <div class="result-label">Última Parcela</div>
                         <div class="result-value">R$ ${formatarMoeda(parcelas[parcelas.length - 1].valorCorrigido)}</div>
                     </div>
-                `;
+                    `;
+                }
 
                 if (reforcos.length > 0) {
                     html += `
@@ -2780,7 +2803,7 @@
                 const modoTexto = modoReais ? 'Valores em R$' : 'Valores em %';
                 const tipoImovelTexto = tipoImovel === 'obras' ? 'Em Obras' : 'Imóvel Pronto';
                 
-                const totalReforcosOriginal = reforcosIndividuais.reduce((sum, r) => sum + r.valor, 0);
+                const totalReforcosOriginaisPrint = reforcosIndividuais.reduce((sum, r) => sum + r.valor, 0);
                 
                 const printSummaryHTML = `
                     <div class="print-summary-item">
@@ -2809,7 +2832,7 @@
                     </div>
                     <div class="print-summary-item">
                         <span class="print-summary-label">Reforços (${reforcosIndividuais.length}):</span>
-                        <span class="print-summary-value">R$ ${formatarMoeda(totalReforcosOriginal)}</span>
+                        <span class="print-summary-value">R$ ${formatarMoeda(totalReforcosOriginaisPrint)}</span>
                     </div>
                     <div class="print-summary-item">
                         <span class="print-summary-label">Chaves:</span>
@@ -2817,7 +2840,7 @@
                     </div>
                     <div class="print-summary-item" style="border-top: 2px solid #FF6B00; margin-top: 0.5rem; padding-top: 0.5rem;">
                         <span class="print-summary-label" style="font-size: 1.1rem;">Valor Total Proposta:</span>
-                        <span class="print-summary-value" style="font-size: 1.3rem;">R$ ${formatarMoeda(entrada + (valorParcela * qtdParcelas) + totalReforcosOriginal + chaves)}</span>
+                        <span class="print-summary-value" style="font-size: 1.3rem;">R$ ${formatarMoeda(entrada + (valorParcela * qtdParcelas) + totalReforcosOriginaisPrint + chaves)}</span>
                     </div>
                     <div class="print-summary-item" style="border-top: 2px solid #FF6B00;">
                         <span class="print-summary-label" style="font-size: 1.1rem;">Valor Total Atualizado:</span>
@@ -2898,7 +2921,7 @@
                 const unidade = {
                     nome: unidadeNome,
                     itens: todosItens,
-                    totalOriginal: entrada + (valorParcela * qtdParcelas) + totalReforcosOriginal + chaves,
+                    totalOriginal: (entrada || 0) + ((valorParcela || 0) * (qtdParcelas || 0)) + (totalReforcosOriginal || 0) + (chaves || 0),
                     totalCorrigido: totalAtualizado
                 };
 
